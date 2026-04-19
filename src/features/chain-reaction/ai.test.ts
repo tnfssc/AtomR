@@ -138,4 +138,78 @@ describe("chooseCpuMove", () => {
 		expect(move).not.toBeNull();
 		expect(legalMoves).toContainEqual(move);
 	});
+
+	it("avoids spawning into a threatened corner when a safe corner exists", () => {
+		const state: GameState = {
+			board: [
+				[
+					{ owner: null, count: 0 },
+					{ owner: "p1", count: 2 },
+					{ owner: null, count: 0 },
+				],
+				[
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+				],
+				[
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+					{ owner: "p2", count: 1 },
+				],
+			],
+			rows: 3,
+			cols: 3,
+			playerCount: 2,
+			currentPlayer: "p2",
+			turnNumber: 8,
+			hasPlayed: { p1: true, p2: true },
+			eliminated: { p1: false, p2: false },
+			winner: null,
+			isDraw: false,
+			drawReason: null,
+			phase: "idle",
+		};
+
+		const move = chooseRecommendedMove(state, 10);
+
+		expect(move).toEqual({ row: 2, col: 0 });
+	});
+
+	it("avoids corners covered by multiple enemy critical stacks", () => {
+		const state: GameState = {
+			board: [
+				[
+					{ owner: null, count: 0 },
+					{ owner: "p1", count: 2 },
+					{ owner: null, count: 0 },
+				],
+				[
+					{ owner: "p1", count: 2 },
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+				],
+				[
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+					{ owner: "p2", count: 1 },
+				],
+			],
+			rows: 3,
+			cols: 3,
+			playerCount: 2,
+			currentPlayer: "p2",
+			turnNumber: 10,
+			hasPlayed: { p1: true, p2: true },
+			eliminated: { p1: false, p2: false },
+			winner: null,
+			isDraw: false,
+			drawReason: null,
+			phase: "idle",
+		};
+
+		const move = chooseRecommendedMove(state, 10);
+
+		expect(move).toEqual({ row: 2, col: 0 });
+	});
 });

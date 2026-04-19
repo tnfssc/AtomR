@@ -31,6 +31,81 @@ function isEdge(row: number, col: number, rows: number, cols: number) {
 	return row === 0 || row === rows - 1 || col === 0 || col === cols - 1;
 }
 
+function getNeighborPositions(
+	row: number,
+	col: number,
+	rows: number,
+	cols: number,
+): Array<readonly [number, number]> {
+	return [
+		[row - 1, col],
+		[row + 1, col],
+		[row, col - 1],
+		[row, col + 1],
+	].filter(
+		([neighborRow, neighborCol]) =>
+			neighborRow >= 0 &&
+			neighborCol >= 0 &&
+			neighborRow < rows &&
+			neighborCol < cols,
+	);
+}
+
+function countImmediateThreats(
+	state: GameState,
+	row: number,
+	col: number,
+	playerId: PlayerId,
+): number {
+	return getNeighborPositions(row, col, state.rows, state.cols).reduce(
+		(total, [neighborRow, neighborCol]) => {
+			const neighbor = state.board[neighborRow][neighborCol];
+			if (!neighbor.owner || neighbor.owner === playerId) {
+				return total;
+			}
+
+			if (state.eliminated[neighbor.owner] ?? false) {
+				return total;
+			}
+
+			const neighborCapacity = getCapacity(
+				neighborRow,
+				neighborCol,
+				state.rows,
+				state.cols,
+			);
+			return neighbor.count === neighborCapacity - 1 ? total + 1 : total;
+		},
+		0,
+	);
+}
+
+function countFriendlySupport(
+	state: GameState,
+	row: number,
+	col: number,
+	playerId: PlayerId,
+): number {
+	return getNeighborPositions(row, col, state.rows, state.cols).reduce(
+		(total, [neighborRow, neighborCol]) => {
+			const neighbor = state.board[neighborRow][neighborCol];
+			if (neighbor.owner !== playerId || neighbor.count === 0) {
+				return total;
+			}
+
+			const neighborCapacity = getCapacity(
+				neighborRow,
+				neighborCol,
+				state.rows,
+				state.cols,
+			);
+			const criticalSupport = neighbor.count === neighborCapacity - 1 ? 2 : 1;
+			return total + criticalSupport;
+		},
+		0,
+	);
+}
+
 function evaluateState(state: GameState, perspective: PlayerId): number {
 	if (state.isDraw) return 0;
 	if (state.winner === perspective) return 1_000_000;
@@ -47,24 +122,32 @@ function evaluateState(state: GameState, perspective: PlayerId): number {
 			const sign = cell.owner === perspective ? 1 : -1;
 			const capacity = getCapacity(row, col, state.rows, state.cols);
 			const critical = cell.count === capacity - 1;
+			const threats = countImmediateThreats(state, row, col, cell.owner);
+			const support = countFriendlySupport(state, row, col, cell.owner);
+			const reserve = capacity - cell.count;
 
 			let positional = 0;
 			if (isCorner(row, col, state.rows, state.cols)) positional = 8;
 			else if (isEdge(row, col, state.rows, state.cols)) positional = 3;
 
-			total += sign * (cell.count * 6 + positional + (critical ? 9 : 0));
+			let survival = support * 4 - threats * (10 + reserve * 4);
+			if (threats === 0) {
+				survival += Math.max(0, cell.count - 1) * 2;
+			} else if (cell.count === 1) {
+				survival -= 8;
+			}
+
+			total +=
+				sign * (cell.count * 6 + positional + (critical ? 9 : 0) + survival);
 
 			if (!critical) continue;
 
-			const neighbors = [
-				[row - 1, col],
-				[row + 1, col],
-				[row, col - 1],
-				[row, col + 1],
-			] as const;
-
-			for (const [nr, nc] of neighbors) {
-				if (nr < 0 || nc < 0 || nr >= state.rows || nc >= state.cols) continue;
+			for (const [nr, nc] of getNeighborPositions(
+				row,
+				col,
+				state.rows,
+				state.cols,
+			)) {
 				const neighbor = state.board[nr][nc];
 				if (!neighbor.owner || neighbor.count === 0) continue;
 				if (
@@ -86,22 +169,32 @@ function quickMoveScore(state: GameState, move: Position): number {
 	const capacity = getCapacity(row, col, state.rows, state.cols);
 	const after = cell.count + 1;
 	let score = after * 2;
+	const threats = countImmediateThreats(state, row, col, state.currentPlayer);
+	const support = countFriendlySupport(state, row, col, state.currentPlayer);
 
 	if (isCorner(row, col, state.rows, state.cols)) score += 10;
 	else if (isEdge(row, col, state.rows, state.cols)) score += 4;
 
 	if (after >= capacity) score += 20;
 	if (after === capacity - 1) score += 8;
+	score += support * 2;
 
-	const neighbors = [
-		[row - 1, col],
-		[row + 1, col],
-		[row, col - 1],
-		[row, col + 1],
-	] as const;
+	if (cell.owner === state.currentPlayer && threats > 0) {
+		score += 12 + cell.count * 3;
+	}
+	if (cell.owner === null && threats > 0) {
+		score -= 12 + threats * 8;
+	}
+	if (threats > 0 && after === capacity - 1) {
+		score -= 6 + threats * 3;
+	}
 
-	for (const [nr, nc] of neighbors) {
-		if (nr < 0 || nc < 0 || nr >= state.rows || nc >= state.cols) continue;
+	for (const [nr, nc] of getNeighborPositions(
+		row,
+		col,
+		state.rows,
+		state.cols,
+	)) {
 		const neighbor = state.board[nr][nc];
 		if (neighbor.owner && neighbor.owner !== state.currentPlayer) {
 			score += 3;
