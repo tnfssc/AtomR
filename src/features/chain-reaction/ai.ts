@@ -23,6 +23,13 @@ type SearchControl = {
 	deadlineAt?: number;
 };
 
+const NEIGHBOR_DIRECTIONS = [
+	[-1, 0],
+	[1, 0],
+	[0, -1],
+	[0, 1],
+] as const;
+
 function isCorner(row: number, col: number, rows: number, cols: number) {
 	return (row === 0 || row === rows - 1) && (col === 0 || col === cols - 1);
 }
@@ -31,53 +38,47 @@ function isEdge(row: number, col: number, rows: number, cols: number) {
 	return row === 0 || row === rows - 1 || col === 0 || col === cols - 1;
 }
 
-function getNeighborPositions(
-	row: number,
-	col: number,
-	rows: number,
-	cols: number,
-): Array<readonly [number, number]> {
-	return [
-		[row - 1, col],
-		[row + 1, col],
-		[row, col - 1],
-		[row, col + 1],
-	].filter(
-		([neighborRow, neighborCol]) =>
-			neighborRow >= 0 &&
-			neighborCol >= 0 &&
-			neighborRow < rows &&
-			neighborCol < cols,
-	);
-}
-
 function countImmediateThreats(
 	state: GameState,
 	row: number,
 	col: number,
 	playerId: PlayerId,
 ): number {
-	return getNeighborPositions(row, col, state.rows, state.cols).reduce(
-		(total, [neighborRow, neighborCol]) => {
-			const neighbor = state.board[neighborRow][neighborCol];
-			if (!neighbor.owner || neighbor.owner === playerId) {
-				return total;
-			}
+	let threats = 0;
 
-			if (state.eliminated[neighbor.owner] ?? false) {
-				return total;
-			}
+	for (const [rowOffset, colOffset] of NEIGHBOR_DIRECTIONS) {
+		const neighborRow = row + rowOffset;
+		const neighborCol = col + colOffset;
+		if (
+			neighborRow < 0 ||
+			neighborCol < 0 ||
+			neighborRow >= state.rows ||
+			neighborCol >= state.cols
+		) {
+			continue;
+		}
 
-			const neighborCapacity = getCapacity(
-				neighborRow,
-				neighborCol,
-				state.rows,
-				state.cols,
-			);
-			return neighbor.count === neighborCapacity - 1 ? total + 1 : total;
-		},
-		0,
-	);
+		const neighbor = state.board[neighborRow][neighborCol];
+		if (!neighbor.owner || neighbor.owner === playerId) {
+			continue;
+		}
+
+		if (state.eliminated[neighbor.owner] ?? false) {
+			continue;
+		}
+
+		const neighborCapacity = getCapacity(
+			neighborRow,
+			neighborCol,
+			state.rows,
+			state.cols,
+		);
+		if (neighbor.count === neighborCapacity - 1) {
+			threats += 1;
+		}
+	}
+
+	return threats;
 }
 
 function countFriendlySupport(
@@ -86,24 +87,35 @@ function countFriendlySupport(
 	col: number,
 	playerId: PlayerId,
 ): number {
-	return getNeighborPositions(row, col, state.rows, state.cols).reduce(
-		(total, [neighborRow, neighborCol]) => {
-			const neighbor = state.board[neighborRow][neighborCol];
-			if (neighbor.owner !== playerId || neighbor.count === 0) {
-				return total;
-			}
+	let support = 0;
 
-			const neighborCapacity = getCapacity(
-				neighborRow,
-				neighborCol,
-				state.rows,
-				state.cols,
-			);
-			const criticalSupport = neighbor.count === neighborCapacity - 1 ? 2 : 1;
-			return total + criticalSupport;
-		},
-		0,
-	);
+	for (const [rowOffset, colOffset] of NEIGHBOR_DIRECTIONS) {
+		const neighborRow = row + rowOffset;
+		const neighborCol = col + colOffset;
+		if (
+			neighborRow < 0 ||
+			neighborCol < 0 ||
+			neighborRow >= state.rows ||
+			neighborCol >= state.cols
+		) {
+			continue;
+		}
+
+		const neighbor = state.board[neighborRow][neighborCol];
+		if (neighbor.owner !== playerId || neighbor.count === 0) {
+			continue;
+		}
+
+		const neighborCapacity = getCapacity(
+			neighborRow,
+			neighborCol,
+			state.rows,
+			state.cols,
+		);
+		support += neighbor.count === neighborCapacity - 1 ? 2 : 1;
+	}
+
+	return support;
 }
 
 function evaluateState(state: GameState, perspective: PlayerId): number {
@@ -142,12 +154,12 @@ function evaluateState(state: GameState, perspective: PlayerId): number {
 
 			if (!critical) continue;
 
-			for (const [nr, nc] of getNeighborPositions(
-				row,
-				col,
-				state.rows,
-				state.cols,
-			)) {
+			for (const [rowOffset, colOffset] of NEIGHBOR_DIRECTIONS) {
+				const nr = row + rowOffset;
+				const nc = col + colOffset;
+				if (nr < 0 || nc < 0 || nr >= state.rows || nc >= state.cols) {
+					continue;
+				}
 				const neighbor = state.board[nr][nc];
 				if (!neighbor.owner || neighbor.count === 0) continue;
 				if (
@@ -189,12 +201,12 @@ function quickMoveScore(state: GameState, move: Position): number {
 		score -= 6 + threats * 3;
 	}
 
-	for (const [nr, nc] of getNeighborPositions(
-		row,
-		col,
-		state.rows,
-		state.cols,
-	)) {
+	for (const [rowOffset, colOffset] of NEIGHBOR_DIRECTIONS) {
+		const nr = row + rowOffset;
+		const nc = col + colOffset;
+		if (nr < 0 || nc < 0 || nr >= state.rows || nc >= state.cols) {
+			continue;
+		}
 		const neighbor = state.board[nr][nc];
 		if (neighbor.owner && neighbor.owner !== state.currentPlayer) {
 			score += 3;
