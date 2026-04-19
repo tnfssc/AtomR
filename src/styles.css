@@ -203,4 +203,13 @@ code {
   border-radius: 50%;
   margin-top: -6px;
   cursor: pointer;
+  background: var(--thumb-color, rgba(255, 255, 255, 0.85));
+}
+.settings-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  background: var(--thumb-color, rgba(255, 255, 255, 0.85));
 }
