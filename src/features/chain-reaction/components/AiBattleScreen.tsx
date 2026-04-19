@@ -159,14 +159,6 @@ export default function AiBattleScreen() {
 		? { width: `${boardDims.w}px`, maxWidth: "100%" }
 		: { width: "100%", maxWidth: "100%" };
 	const playerNames = useMemo(() => getAiNames(playerCount), [playerCount]);
-	const difficultyLabel = useMemo(() => {
-		if (difficulty <= 2) return "loose";
-		if (difficulty <= 4) return "casual";
-		if (difficulty <= 6) return "sharp";
-		if (difficulty <= 8) return "ruthless";
-		return "nightmare";
-	}, [difficulty]);
-
 	return (
 		<main
 			className="relative flex h-[100dvh] flex-col overflow-hidden px-3 pt-5 pb-4"
@@ -225,7 +217,6 @@ export default function AiBattleScreen() {
 				playerCount={playerCount}
 				playerCountLocked={false}
 				difficulty={difficulty}
-				difficultyLabel={difficultyLabel}
 				onApply={(newRows, newCols, newDifficulty, newPlayerCount) => {
 					clearCpuTimer();
 					cancelCpuTask();

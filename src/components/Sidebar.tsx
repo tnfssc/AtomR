@@ -131,9 +131,12 @@ export default function Sidebar() {
 					{isPending ? (
 						<div className="h-14 rounded-[18px] bg-white/[0.04]" />
 					) : session?.user ? (
-						<div className="rounded-[20px] bg-white/[0.025] px-3 py-3">
+						<div
+							className="rounded-[20px] p-3"
+							style={{ background: "rgba(255,255,255,0.022)" }}
+						>
 							<div className="flex min-w-0 items-center gap-3">
-								<div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[16px] bg-white/[0.05]">
+								<div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-[14px] bg-white/[0.07]">
 									{session.user.image ? (
 										<img
 											src={session.user.image}
@@ -141,20 +144,24 @@ export default function Sidebar() {
 											className="h-full w-full object-cover"
 										/>
 									) : (
-										<span className="text-base font-semibold text-white/72">
+										<span className="text-[15px] font-bold text-white/80">
 											{userInitial}
 										</span>
 									)}
 								</div>
 								<div className="min-w-0 flex-1">
-									<div className="truncate text-[14px] font-semibold text-white/92">
+									<div className="truncate text-[13px] font-semibold leading-snug text-white/92">
 										{userLabel}
 									</div>
-									<div className="truncate text-[11px] text-white/34 max-[420px]:hidden">
+									<div className="truncate text-[11px] leading-snug text-white/30 max-[420px]:hidden">
 										{session.user.email}
 									</div>
 								</div>
 							</div>
+							<div
+								className="my-2.5 h-px"
+								style={{ background: "rgba(255,255,255,0.055)" }}
+							/>
 							<button
 								type="button"
 								onClick={async () => {
@@ -166,7 +173,7 @@ export default function Sidebar() {
 									});
 									window.location.href = "/";
 								}}
-								className="mt-3 inline-flex h-10 w-full items-center justify-center rounded-[16px] bg-white/[0.045] px-4 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/56 transition hover:bg-white/[0.08] hover:text-white/84 active:scale-[0.98] min-[961px]:mt-0 min-[961px]:w-auto"
+								className="inline-flex h-9 w-full items-center justify-center rounded-[13px] bg-white/[0.04] text-[10px] font-semibold uppercase tracking-[0.22em] text-white/44 transition hover:bg-white/[0.07] hover:text-white/70 active:scale-[0.98]"
 							>
 								Sign Out
 							</button>

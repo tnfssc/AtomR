@@ -2,7 +2,6 @@ import {
 	useCallback,
 	useEffect,
 	useLayoutEffect,
-	useMemo,
 	useRef,
 	useState,
 } from "react";
@@ -23,19 +22,6 @@ const PLAYER_NAMES = {
 	p1: "Player",
 	p2: "CPU",
 } as const;
-
-const DIFFICULTY_COPY = [
-	"reckless",
-	"sleepy",
-	"casual",
-	"aware",
-	"sharp",
-	"solid",
-	"mean",
-	"ruthless",
-	"elite",
-	"nightmare",
-] as const;
 
 export default function AiPlayScreen() {
 	const [rows, setRows] = useState(6);
@@ -168,11 +154,6 @@ export default function AiPlayScreen() {
 	const hudStyle: React.CSSProperties = boardDims
 		? { width: `${boardDims.w}px`, maxWidth: "100%" }
 		: { width: "100%", maxWidth: "100%" };
-	const difficultyCopy = useMemo(
-		() => DIFFICULTY_COPY[Math.max(0, Math.min(9, difficulty - 1))] ?? "solid",
-		[difficulty],
-	);
-
 	return (
 		<main
 			className="relative flex h-[100dvh] flex-col overflow-hidden px-3 pt-5 pb-4"
@@ -227,20 +208,12 @@ export default function AiPlayScreen() {
 				</div>
 			</div>
 
-			<p
-				className="relative shrink-0 text-center text-[10px] uppercase tracking-[0.3em]"
-				style={{ color: "rgba(255,255,255,0.12)" }}
-			>
-				play first as orange · cpu answers after every resolved turn
-			</p>
-
 			<GameSettings
 				open={settingsOpen}
 				rows={rows}
 				cols={cols}
 				playerCount={2}
 				difficulty={difficulty}
-				difficultyLabel={difficultyCopy}
 				onApply={(newRows, newCols, newDifficulty) => {
 					clearCpuTimer();
 					setIsCpuThinking(false);

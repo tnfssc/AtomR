@@ -8,7 +8,6 @@ type GameSettingsProps = {
 	playerCount?: number;
 	playerCountLocked?: boolean;
 	difficulty?: number;
-	difficultyLabel?: string;
 	onApply: (
 		rows: number,
 		cols: number,
@@ -25,7 +24,6 @@ export default function GameSettings({
 	playerCount,
 	playerCountLocked = true,
 	difficulty,
-	difficultyLabel,
 	onApply,
 	onClose,
 }: GameSettingsProps) {
@@ -235,22 +233,7 @@ export default function GameSettings({
 						<div className="flex flex-col gap-2">
 							<div className="flex items-center justify-between">
 								<span style={labelStyle}>cpu difficulty</span>
-								<div className="flex items-center gap-2">
-									<span style={valueStyle}>{localDifficulty}</span>
-									{difficultyLabel ? (
-										<span
-											style={{
-												fontFamily: "'Oxanium', sans-serif",
-												fontSize: "8px",
-												color: "rgba(255,255,255,0.4)",
-												textTransform: "uppercase",
-												letterSpacing: "0.2em",
-											}}
-										>
-											{difficultyLabel}
-										</span>
-									) : null}
-								</div>
+								<span style={valueStyle}>{localDifficulty}</span>
 							</div>
 							<input
 								type="range"
