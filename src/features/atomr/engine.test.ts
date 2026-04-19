@@ -99,7 +99,7 @@ describe("AtomR engine", () => {
 		).toBe(true);
 	});
 
-	it("resolves multi-step cascades to stable board", () => {
+	it("resolves multi-step orb cascades to stable board", () => {
 		const state = createInitialGameState(3, 3);
 		state.board[1][1] = { owner: "p1", count: 3 };
 		state.board[0][1] = { owner: "p1", count: 2 };

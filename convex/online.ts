@@ -165,8 +165,9 @@ function alphabet() {
 function makeRoomCode() {
 	const chars = alphabet()
 	let code = ''
+	const random = crypto.getRandomValues(new Uint32Array(5))
 	for (let i = 0; i < 5; i += 1) {
-		code += chars[Math.floor(Math.random() * chars.length)]
+		code += chars[random[i] % chars.length]
 	}
 	return code
 }
