@@ -71,6 +71,9 @@ export default function GameSettings({
 		color: "rgba(255,255,255,0.88)",
 	};
 
+	const sliderStyle = (thumbColor: string): React.CSSProperties =>
+		({ "--thumb-color": thumbColor, height: "4px" }) as React.CSSProperties;
+
 	return (
 		<>
 			{/* Backdrop — button so Biome a11y rules are satisfied */}
@@ -133,12 +136,7 @@ export default function GameSettings({
 							value={localRows}
 							onChange={(e) => setLocalRows(Number(e.target.value))}
 							className="settings-slider w-full cursor-pointer appearance-none rounded-full"
-							style={
-								{
-									"--thumb-color": "oklch(0.72 0.19 23)",
-									height: "4px",
-								} as React.CSSProperties
-							}
+							style={sliderStyle("oklch(0.72 0.19 23)")}
 						/>
 						<div
 							className="flex justify-between"
@@ -166,12 +164,7 @@ export default function GameSettings({
 							value={localCols}
 							onChange={(e) => setLocalCols(Number(e.target.value))}
 							className="settings-slider w-full cursor-pointer appearance-none rounded-full"
-							style={
-								{
-									"--thumb-color": "oklch(0.72 0.19 23)",
-									height: "4px",
-								} as React.CSSProperties
-							}
+							style={sliderStyle("oklch(0.72 0.19 23)")}
 						/>
 						<div
 							className="flex justify-between"
@@ -221,12 +214,7 @@ export default function GameSettings({
 									value={localPlayerCount}
 									onChange={(e) => setLocalPlayerCount(Number(e.target.value))}
 									className="settings-slider w-full cursor-pointer appearance-none rounded-full"
-									style={
-										{
-											"--thumb-color": "rgba(255,255,255,0.7)",
-											height: "4px",
-										} as React.CSSProperties
-									}
+									style={sliderStyle("rgba(255,255,255,0.7)")}
 								/>
 								<div
 									className="flex justify-between"
@@ -271,12 +259,7 @@ export default function GameSettings({
 								value={localDifficulty}
 								onChange={(e) => setLocalDifficulty(Number(e.target.value))}
 								className="settings-slider w-full cursor-pointer appearance-none rounded-full"
-								style={
-									{
-										"--thumb-color": "oklch(0.78 0.16 210)",
-										height: "4px",
-									} as React.CSSProperties
-								}
+								style={sliderStyle("oklch(0.78 0.16 210)")}
 							/>
 							<div
 								className="flex justify-between"
