@@ -352,7 +352,6 @@ function MatchPage() {
 						{/* Home */}
 						<button
 							type="button"
-							aria-label="Home"
 							className="flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] min-[480px]:h-10 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3"
 							style={{
 								background: "rgba(255,255,255,0.02)",
@@ -401,7 +400,7 @@ function MatchPage() {
 									>
 										{matchState.winner ? "—" : `${secondsRemaining}s`}
 									</div>
-									<div className="mt-0.5 text-[9px] uppercase tracking-[0.22em] text-white/30">
+									<div className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-white/42">
 										{matchState.winner
 											? "done"
 											: matchState.currentPlayer === viewerPlayerId
@@ -432,7 +431,6 @@ function MatchPage() {
 							<button
 								type="button"
 								disabled={resignPending}
-								aria-label="Resign"
 								className="flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-55 min-[480px]:h-10 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3"
 								style={{
 									background: "rgba(224,92,58,0.10)",

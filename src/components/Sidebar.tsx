@@ -173,7 +173,7 @@ export default function Sidebar() {
 									});
 									window.location.href = "/";
 								}}
-								className="inline-flex h-9 w-full items-center justify-center rounded-[13px] bg-white/[0.04] text-[10px] font-semibold uppercase tracking-[0.22em] text-white/44 transition hover:bg-white/[0.07] hover:text-white/70 active:scale-[0.98]"
+								className="inline-flex h-9 w-full items-center justify-center rounded-[13px] bg-white/[0.04] text-[10px] font-semibold uppercase tracking-[0.22em] text-white/58 transition hover:bg-white/[0.07] hover:text-white/78 active:scale-[0.98]"
 							>
 								Sign Out
 							</button>
