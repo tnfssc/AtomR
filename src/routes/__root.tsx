@@ -27,12 +27,28 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 			{ charSet: "utf-8" },
 			{ name: "viewport", content: "width=device-width, initial-scale=1" },
 			{ title: "Atom Reaction" },
+			{ name: "apple-mobile-web-app-capable", content: "yes" },
+			{
+				name: "apple-mobile-web-app-status-bar-style",
+				content: "black-translucent",
+			},
+			{ name: "apple-mobile-web-app-title", content: "Atom Reaction" },
+			{ name: "mobile-web-app-capable", content: "yes" },
+			{ name: "theme-color", content: "#07070b" },
 		],
 		links: [
 			{
 				rel: "icon",
 				type: "image/svg+xml",
 				href: "/brand/atom-reaction-mark.svg",
+			},
+			{
+				rel: "apple-touch-icon",
+				href: "/logo192.png",
+			},
+			{
+				rel: "manifest",
+				href: "/manifest.webmanifest",
 			},
 			{
 				rel: "stylesheet",
