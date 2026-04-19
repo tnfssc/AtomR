@@ -183,3 +183,24 @@ code {
 .cr-capture-ripple {
   animation: cr-capture-ripple 0.16s ease-out forwards;
 }
+
+/* Settings sliders — visible track on dark background */
+.settings-slider::-webkit-slider-runnable-track {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  height: 4px;
+}
+.settings-slider::-moz-range-track {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+  height: 4px;
+}
+.settings-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  margin-top: -6px;
+  cursor: pointer;
+}

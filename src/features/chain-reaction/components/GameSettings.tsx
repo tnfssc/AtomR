@@ -129,10 +129,10 @@ export default function GameSettings({
 						<input
 							type="range"
 							min={3}
-							max={12}
+							max={16}
 							value={localRows}
 							onChange={(e) => setLocalRows(Number(e.target.value))}
-							className="w-full cursor-pointer appearance-none rounded-full"
+							className="settings-slider w-full cursor-pointer appearance-none rounded-full"
 							style={{ accentColor: "oklch(0.72 0.19 23)", height: "4px" }}
 						/>
 						<div
@@ -144,7 +144,7 @@ export default function GameSettings({
 							}}
 						>
 							<span>3</span>
-							<span>12</span>
+							<span>16</span>
 						</div>
 					</div>
 
@@ -156,11 +156,11 @@ export default function GameSettings({
 						</div>
 						<input
 							type="range"
-							min={4}
+							min={3}
 							max={16}
 							value={localCols}
 							onChange={(e) => setLocalCols(Number(e.target.value))}
-							className="w-full cursor-pointer appearance-none rounded-full"
+							className="settings-slider w-full cursor-pointer appearance-none rounded-full"
 							style={{ accentColor: "oklch(0.72 0.19 23)", height: "4px" }}
 						/>
 						<div
@@ -171,7 +171,7 @@ export default function GameSettings({
 								color: "rgba(255,255,255,0.15)",
 							}}
 						>
-							<span>4</span>
+							<span>3</span>
 							<span>16</span>
 						</div>
 					</div>
@@ -210,7 +210,7 @@ export default function GameSettings({
 									max={8}
 									value={localPlayerCount}
 									onChange={(e) => setLocalPlayerCount(Number(e.target.value))}
-									className="w-full cursor-pointer appearance-none rounded-full"
+									className="settings-slider w-full cursor-pointer appearance-none rounded-full"
 									style={{
 										accentColor: "rgba(255,255,255,0.7)",
 										height: "4px",
@@ -258,7 +258,7 @@ export default function GameSettings({
 								max={10}
 								value={localDifficulty}
 								onChange={(e) => setLocalDifficulty(Number(e.target.value))}
-								className="w-full cursor-pointer appearance-none rounded-full"
+								className="settings-slider w-full cursor-pointer appearance-none rounded-full"
 								style={{ accentColor: "oklch(0.78 0.16 210)", height: "4px" }}
 							/>
 							<div
