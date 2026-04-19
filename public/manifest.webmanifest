@@ -1,0 +1,17 @@
+{
+  "name": "AtomR",
+  "short_name": "AtomR",
+  "description": "Turn-based AtomR board game.",
+  "icons": [
+    {
+      "src": "/brand/atomr-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#07070b",
+  "background_color": "#07070b"
+}
