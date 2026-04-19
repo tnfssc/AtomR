@@ -429,44 +429,44 @@ function MatchPage() {
 							</div>
 						</div>
 
-						{/* Resign / spacer */}
-						{!matchState.winner ? (
-							<button
-								type="button"
-								disabled={resignPending}
-								className="flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-55 min-[480px]:h-10 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3"
-								style={{
-									background: "rgba(224,92,58,0.10)",
-									color: "rgba(255,159,134,0.88)",
-									fontFamily: "'Oxanium', sans-serif",
-									fontSize: "10px",
-									fontWeight: 700,
-									letterSpacing: "0.22em",
-									textTransform: "uppercase",
-								}}
-								onClick={async () => {
-									if (
-										!window.confirm(
-											"Resign this match? This immediately gives the win to your opponent.",
-										)
+						{/* Resign */}
+						<button
+							type="button"
+							disabled={resignPending || Boolean(matchState.winner)}
+							aria-hidden={Boolean(matchState.winner)}
+							tabIndex={matchState.winner ? -1 : undefined}
+							className={`flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-55 min-[480px]:h-10 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3 ${
+								matchState.winner ? "pointer-events-none invisible" : ""
+							}`}
+							style={{
+								background: "rgba(224,92,58,0.10)",
+								color: "rgba(255,159,134,0.88)",
+								fontFamily: "'Oxanium', sans-serif",
+								fontSize: "10px",
+								fontWeight: 700,
+								letterSpacing: "0.22em",
+								textTransform: "uppercase",
+							}}
+							onClick={async () => {
+								if (
+									!window.confirm(
+										"Resign this match? This immediately gives the win to your opponent.",
 									)
-										return;
-									setResignPending(true);
-									try {
-										await resignMatch({ matchId: match._id });
-									} finally {
-										setResignPending(false);
-									}
-								}}
-							>
-								<Flag size={14} strokeWidth={2} />
-								<span className="hidden min-[480px]:inline">
-									{resignPending ? "…" : "resign"}
-								</span>
-							</button>
-						) : (
-							<div className="h-9 w-9 min-[480px]:h-10 min-[480px]:w-10" />
-						)}
+								)
+									return;
+								setResignPending(true);
+								try {
+									await resignMatch({ matchId: match._id });
+								} finally {
+									setResignPending(false);
+								}
+							}}
+						>
+							<Flag size={14} strokeWidth={2} />
+							<span className="hidden min-[480px]:inline">
+								{resignPending ? "…" : "resign"}
+							</span>
+						</button>
 					</div>
 				</div>
 			</div>

@@ -130,7 +130,7 @@ export default function GameSettings({
 						<input
 							type="range"
 							min={3}
-							max={16}
+							max={12}
 							value={localRows}
 							onChange={(e) => setLocalRows(Number(e.target.value))}
 							className="settings-slider w-full cursor-pointer appearance-none rounded-full"
@@ -145,7 +145,7 @@ export default function GameSettings({
 							}}
 						>
 							<span>3</span>
-							<span>16</span>
+							<span>12</span>
 						</div>
 					</div>
 
@@ -157,7 +157,7 @@ export default function GameSettings({
 						</div>
 						<input
 							type="range"
-							min={3}
+							min={4}
 							max={16}
 							value={localCols}
 							onChange={(e) => setLocalCols(Number(e.target.value))}
@@ -172,7 +172,7 @@ export default function GameSettings({
 								color: "rgba(255,255,255,0.15)",
 							}}
 						>
-							<span>3</span>
+							<span>4</span>
 							<span>16</span>
 						</div>
 					</div>
