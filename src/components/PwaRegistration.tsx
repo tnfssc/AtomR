@@ -15,7 +15,11 @@ export default function PwaRegistration() {
 				await navigator.serviceWorker.register("/sw.js", {
 					scope: "/",
 				});
-			} catch {}
+			} catch (error) {
+				if (import.meta.env.DEV) {
+					console.warn("Service worker registration failed.", error);
+				}
+			}
 		};
 
 		if (document.readyState === "complete") {
