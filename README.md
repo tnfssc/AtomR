@@ -1,98 +1,130 @@
 # Atom Reaction
 
-Turn-based chain-reaction board game built with TanStack Start, Convex, and Better Auth.
+> A turn-based chain-reaction board game — play locally, online, or against AI.
 
-MIT licensed.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61dafb?logo=react&logoColor=white)](https://react.dev/)
+[![Convex](https://img.shields.io/badge/Backend-Convex-ee342f)](https://convex.dev/)
 
-## What’s Here
+---
 
-- Local pass-and-play
-- Online matchmaking and private rooms
-- Training mode with AI move suggestions
-- CPU play
-- AI battle simulation
+## Features
 
-## Stack
+| Feature | Description |
+|---|---|
+| 🎮 **Local pass-and-play** | Two or more players share one device |
+| 🌐 **Online multiplayer** | Matchmaking and private rooms |
+| 🤖 **AI opponents** | CPU play and AI vs AI battle simulation |
+| 🧠 **Training mode** | Real-time AI move suggestions while you play |
 
-- React 19
-- TanStack Start + TanStack Router
-- Convex
-- Better Auth
-- Tailwind CSS 4
-- Vitest
+## Tech Stack
 
-## Local Dev
+| Layer | Technology |
+|---|---|
+| UI | React 19, Tailwind CSS 4 |
+| Routing / SSR | TanStack Start + TanStack Router |
+| Backend / DB | Convex |
+| Auth | Better Auth |
+| Testing | Vitest |
+| Linting | Biome |
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) ≥ 20
+- [pnpm](https://pnpm.io/) ≥ 9
+- A [Convex](https://convex.dev/) account (free tier is fine)
+
+### Installation
 
 ```bash
+git clone https://github.com/tnfssc/atom-reaction.git
+cd atom-reaction
 pnpm install
+cp .env.example .env.local
+```
+
+Fill in `.env.local` (see [Environment](#environment) below), then:
+
+```bash
 pnpm dev
 ```
 
-`pnpm dev` starts both:
+This starts both servers concurrently:
 
-- Vite frontend on `http://localhost:3000`
-- Convex dev loop
+- **App** → `http://localhost:3000`
+- **Convex dev loop** → real-time backend sync
 
-First run may still prompt you to create/select a Convex dev deployment.
+> [!NOTE]
+> On the very first run, the Convex CLI may prompt you to create or select a dev deployment.
 
 ## Environment
 
-Copy `.env.example` to `.env.local` and fill what you need.
+### App / Vite variables (`.env.local`)
 
-App-side envs:
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_CONVEX_URL` | ✅ | Convex deployment URL |
+| `VITE_CONVEX_SITE_URL` | ✅ | Convex HTTP site URL |
+| `SITE_URL` | ✅ | Local or deployed app URL |
+| `VITE_POSTHOG_KEY` | ☑️ optional | PostHog analytics key |
+| `VITE_POSTHOG_HOST` | ☑️ optional | PostHog host |
 
-- `VITE_CONVEX_URL`
-- `VITE_CONVEX_SITE_URL`
-- `VITE_POSTHOG_KEY` optional
-- `VITE_POSTHOG_HOST` optional
-- `SITE_URL`
+### Convex deployment variables
 
-Auth/runtime envs also need to exist in the Convex deployment env, not just local files:
+These must also be set **inside your Convex deployment** (not just in `.env.local`):
 
-- `BETTER_AUTH_SECRET`
-- `BETTER_AUTH_URL` or `SITE_URL`
-- `GOOGLE_CLIENT_ID`
-- `GOOGLE_CLIENT_SECRET`
-- `CONVEX_SITE_URL`
-- `CONVEX_CLOUD_URL`
-- `TRUSTED_ORIGINS`
+| Variable | Description |
+|---|---|
+| `BETTER_AUTH_SECRET` | Random secret for Better Auth |
+| `BETTER_AUTH_URL` / `SITE_URL` | Canonical app URL |
+| `GOOGLE_CLIENT_ID` | Google OAuth client ID |
+| `GOOGLE_CLIENT_SECRET` | Google OAuth client secret |
+| `CONVEX_SITE_URL` | Convex HTTP site URL |
+| `CONVEX_CLOUD_URL` | Convex cloud URL |
+| `TRUSTED_ORIGINS` | Comma-separated list of trusted origins |
 
-For local Convex envs:
+Set them via the Convex CLI:
 
 ```bash
-npx convex env set BETTER_AUTH_SECRET ...
-npx convex env set GOOGLE_CLIENT_ID ...
-npx convex env set GOOGLE_CLIENT_SECRET ...
+npx convex env set BETTER_AUTH_SECRET <value>
+npx convex env set GOOGLE_CLIENT_ID   <value>
+npx convex env set GOOGLE_CLIENT_SECRET <value>
+# … and so on
 ```
 
 ## Scripts
 
 ```bash
-pnpm dev
-pnpm build
-pnpm test
-pnpm typecheck
-pnpm check
+pnpm dev          # start app + Convex dev loop
+pnpm build        # production build
+pnpm test         # run Vitest suite
+pnpm typecheck    # tsc type-check
+pnpm check        # Biome lint + format check
+pnpm storybook    # component explorer on :6006
 ```
+
+## Deployment
+
+| Part | Platform |
+|---|---|
+| Frontend | [Vercel](https://vercel.com/) |
+| Backend / Auth | [Convex](https://convex.dev/) |
+
+A GitHub Actions workflow automatically deploys Convex on every push to `develop`. It requires a `CONVEX_DEPLOY_KEY` secret in the repository settings.
+
+**Pre-launch checklist:**
+
+- [ ] `SITE_URL` / `BETTER_AUTH_URL` points to your production domain
+- [ ] All Convex deployment env vars are set
+- [ ] Google OAuth **Authorized origins** and **redirect URIs** include the production domain
 
 ## Contributing
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md).
+Contributions are welcome! Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 
-## Deploy
+## License
 
-Frontend is intended for Vercel. Backend/auth run on Convex.
-
-Current repo includes a GitHub Action that deploys Convex on pushes to `develop` using `CONVEX_DEPLOY_KEY`.
-
-Before production auth works, make sure:
-
-- app URL is set correctly
-- Convex deployment envs are set
-- Google OAuth origins + callback URLs match the deployed domain
-
-## Status
-
-`package.json` is still marked `"private": true` intentionally.
-
-That prevents accidental npm publish. Public GitHub repo does not require changing it.
+[MIT](./LICENSE.md)
