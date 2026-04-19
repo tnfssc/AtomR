@@ -1,12 +1,20 @@
 {
+  "id": "/",
   "name": "AtomR",
   "short_name": "AtomR",
   "description": "Turn-based AtomR board game.",
+  "scope": "/",
   "icons": [
     {
       "src": "/brand/atomr-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 24x24",
+      "type": "image/x-icon",
       "purpose": "any"
     }
   ],

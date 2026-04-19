@@ -7,6 +7,7 @@ import {
 	useRouterState,
 } from "@tanstack/react-router";
 import { lazy, Suspense } from "react";
+import PwaRegistration from "../components/PwaRegistration";
 import Sidebar from "../components/Sidebar";
 import ConvexProvider from "../integrations/convex/provider";
 import PostHogProvider from "../integrations/posthog/provider";
@@ -101,7 +102,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
 			</head>
 			<body className="font-sans antialiased wrap-anywhere selection:bg-[rgba(79,184,178,0.24)]">
 				<ConvexProvider>
-					<PostHogProvider>{children}</PostHogProvider>
+					<PostHogProvider>
+						<PwaRegistration />
+						{children}
+					</PostHogProvider>
 				</ConvexProvider>
 				<Scripts />
 			</body>
