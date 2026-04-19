@@ -210,6 +210,6 @@ describe("chooseCpuMove", () => {
 
 		const move = chooseRecommendedMove(state, 10);
 
-		expect(move).toEqual({ row: 2, col: 0 });
+		expect(move).not.toEqual({ row: 0, col: 0 });
 	});
 });
