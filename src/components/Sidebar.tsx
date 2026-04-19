@@ -1,7 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, Swords } from "lucide-react";
 import { authClient } from "#/lib/auth-client";
-import AtomReactionMark from "./brand/AtomReactionMark";
+import AtomRMark from "./brand/AtomRMark";
 
 const F = "'Oxanium', 'Segoe UI', sans-serif";
 
@@ -31,11 +31,11 @@ export default function Sidebar() {
 						className="flex min-w-0 flex-1 items-center gap-3 no-underline max-[460px]:w-full"
 					>
 						<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-white/[0.035]">
-							<AtomReactionMark size={20} title="Atom Reaction" />
+							<AtomRMark size={20} title="AtomR" />
 						</div>
 						<div className="min-w-0 flex-1">
 							<div className="text-[17px] leading-none font-semibold tracking-[0.09em] text-white max-[520px]:text-[16px] max-[520px]:tracking-[0.06em] max-[420px]:text-[15px] max-[420px]:tracking-[0.04em]">
-								Atom Reaction
+								AtomR
 							</div>
 						</div>
 					</Link>

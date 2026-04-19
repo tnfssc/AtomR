@@ -1,18 +1,34 @@
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { PLAYER_COLORS } from "#/features/chain-reaction/constants";
-import { useChainReactionGame } from "#/features/chain-reaction/useChainReactionGame";
-import { getRecommendedSize } from "#/features/chain-reaction/utils/recommendedSize";
-import ChainReactionBoard from "./ChainReactionBoard";
+import {
+	startTransition,
+	useCallback,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
+import {
+	type AiMoveTask,
+	requestRecommendedMove,
+} from "#/features/atomr/ai-worker-client";
+import { PLAYER_COLORS } from "#/features/atomr/constants";
+import { useAtomRGame } from "#/features/atomr/useAtomRGame";
+import { getRecommendedSize } from "#/features/atomr/utils/recommendedSize";
+import AtomRBoard from "./AtomRBoard";
 import GameHud from "./GameHud";
 import GameOverlay from "./GameOverlay";
 import GameSettings from "./GameSettings";
 
-export default function LocalPlayScreen() {
+const TRAINING_DIFFICULTY = 10;
+
+export default function TrainingPlayScreen() {
 	const [rows, setRows] = useState(6);
 	const [cols, setCols] = useState(9);
-	const [playerCount, setPlayerCount] = useState(2);
 	const [settingsOpen, setSettingsOpen] = useState(false);
 	const [settingsResetToken, setSettingsResetToken] = useState(0);
+	const [suggestedMove, setSuggestedMove] = useState<{
+		row: number;
+		col: number;
+	} | null>(null);
 
 	useEffect(() => {
 		const rec = getRecommendedSize();
@@ -22,6 +38,7 @@ export default function LocalPlayScreen() {
 
 	const {
 		state,
+		resolvedState,
 		handleMove,
 		reset,
 		isAnimating,
@@ -29,12 +46,19 @@ export default function LocalPlayScreen() {
 		activeCaptureKeys,
 		activeExplosions,
 		lastMove,
-	} = useChainReactionGame(rows, cols, playerCount, settingsResetToken);
+	} = useAtomRGame(rows, cols, 2, settingsResetToken);
 
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [boardDims, setBoardDims] = useState<{ w: number; h: number } | null>(
 		null,
 	);
+	const suggestionTimerRef = useRef<number | null>(null);
+	const suggestionTaskRef = useRef<AiMoveTask | null>(null);
+
+	const cancelSuggestionTask = useCallback(() => {
+		suggestionTaskRef.current?.cancel();
+		suggestionTaskRef.current = null;
+	}, []);
 
 	useLayoutEffect(() => {
 		const element = containerRef.current;
@@ -73,6 +97,61 @@ export default function LocalPlayScreen() {
 		? { width: `${boardDims.w}px`, maxWidth: "100%" }
 		: { width: "100%", maxWidth: "100%" };
 
+	useEffect(() => {
+		if (suggestionTimerRef.current !== null) {
+			window.clearTimeout(suggestionTimerRef.current);
+			suggestionTimerRef.current = null;
+		}
+
+		cancelSuggestionTask();
+		setSuggestedMove(null);
+
+		if (resolvedState.phase !== "idle") {
+			return;
+		}
+		suggestionTimerRef.current = window.setTimeout(() => {
+			suggestionTimerRef.current = null;
+			const task = requestRecommendedMove(resolvedState, TRAINING_DIFFICULTY);
+			suggestionTaskRef.current = task;
+			void task.promise
+				.then((nextSuggestedMove) => {
+					if (suggestionTaskRef.current !== task) return;
+					startTransition(() => {
+						setSuggestedMove(nextSuggestedMove);
+					});
+				})
+				.catch(() => {
+					if (suggestionTaskRef.current !== task) return;
+					startTransition(() => {
+						setSuggestedMove(null);
+					});
+				})
+				.finally(() => {
+					if (suggestionTaskRef.current === task) {
+						suggestionTaskRef.current = null;
+					}
+				});
+		}, 0);
+
+		return () => {
+			if (suggestionTimerRef.current !== null) {
+				window.clearTimeout(suggestionTimerRef.current);
+				suggestionTimerRef.current = null;
+			}
+			cancelSuggestionTask();
+		};
+	}, [cancelSuggestionTask, resolvedState]);
+
+	useEffect(() => {
+		return () => {
+			if (suggestionTimerRef.current !== null) {
+				window.clearTimeout(suggestionTimerRef.current);
+				suggestionTimerRef.current = null;
+			}
+			cancelSuggestionTask();
+		};
+	}, [cancelSuggestionTask]);
+
 	return (
 		<main
 			className="relative flex h-[100dvh] flex-col overflow-hidden px-3 pt-5 pb-4"
@@ -96,16 +175,19 @@ export default function LocalPlayScreen() {
 				}}
 			/>
 
-			<div className="relative mx-auto w-full shrink-0" style={hudStyle}>
+			<div
+				className="relative mx-auto flex w-full shrink-0 flex-col"
+				style={hudStyle}
+			>
 				<GameHud state={state} onSettingsOpen={() => setSettingsOpen(true)} />
 			</div>
 
 			<div
 				ref={containerRef}
-				className="relative flex-1 min-h-0 flex items-center justify-center"
+				className="relative flex min-h-0 flex-1 items-center justify-center"
 			>
 				<div style={boardStyle} className="relative">
-					<ChainReactionBoard
+					<AtomRBoard
 						state={state}
 						activeColor={activeColor}
 						isAnimating={isAnimating}
@@ -114,6 +196,8 @@ export default function LocalPlayScreen() {
 						activeExplosions={activeExplosions}
 						cellSize={cellSize}
 						lastMove={lastMove}
+						suggestedMove={suggestedMove}
+						suggestedPlayer={resolvedState.currentPlayer}
 						onPlay={(row, col) => handleMove({ row, col })}
 					/>
 					<GameOverlay state={state} onReset={reset} />
@@ -121,22 +205,20 @@ export default function LocalPlayScreen() {
 			</div>
 
 			<p
-				className="relative text-center text-[10px] uppercase tracking-[0.3em] shrink-0"
+				className="relative shrink-0 text-center text-[10px] uppercase tracking-[0.3em]"
 				style={{ color: "rgba(255,255,255,0.12)" }}
 			>
-				Place on empty or owned cells · chains resolve automatically
+				two-player coaching board · follow the ghost or ignore it and compare
 			</p>
 
 			<GameSettings
 				open={settingsOpen}
 				rows={rows}
 				cols={cols}
-				playerCount={playerCount}
-				playerCountLocked={false}
-				onApply={(newRows, newCols, _newDifficulty, newPlayerCount) => {
+				playerCount={2}
+				onApply={(newRows, newCols) => {
 					setRows(newRows);
 					setCols(newCols);
-					setPlayerCount(newPlayerCount ?? 2);
 					setSettingsResetToken((token) => token + 1);
 				}}
 				onClose={() => setSettingsOpen(false)}

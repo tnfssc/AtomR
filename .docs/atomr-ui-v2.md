@@ -1,4 +1,4 @@
-# Chain Reaction UI v2 — Tactical Grid
+# AtomR UI v2 — Tactical Grid
 
 ## Aesthetic Direction
 
@@ -19,7 +19,7 @@
 
 ## Board Layout
 
-- **Orientation**: 9 rows × 6 cols (portrait) via `useChainReactionGame(9, 6)`
+- **Orientation**: 9 rows × 6 cols (portrait) via `useAtomRGame(9, 6)`
 - **Sizing**: `h-[100dvh]` on `main` + `flex-1 min-h-0` on board container + `h-full` chain through board wrappers + `gridTemplateRows: repeat(9, minmax(0, 1fr))`
 - **Cells**: No `aspect-square` — cells fill available grid space (slightly taller than wide on mobile, ~73×62px on 390px wide screen)
 - **Board border**: 1px gradient border via `p-px` wrapper with `linear-gradient(135deg, color55, color18, color38)`

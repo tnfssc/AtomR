@@ -1,4 +1,4 @@
-# Chain Reaction Game Feel Research
+# AtomR Game Feel Research
 
 ## Goal
 

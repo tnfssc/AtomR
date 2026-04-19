@@ -2,33 +2,42 @@ import {
 	useCallback,
 	useEffect,
 	useLayoutEffect,
+	useMemo,
 	useRef,
 	useState,
 } from "react";
-import { configForDifficulty } from "#/features/chain-reaction/ai";
+import { configForDifficulty } from "#/features/atomr/ai";
 import {
 	type AiMoveTask,
 	requestCpuMove,
-} from "#/features/chain-reaction/ai-worker-client";
-import { PLAYER_COLORS } from "#/features/chain-reaction/constants";
-import { useChainReactionGame } from "#/features/chain-reaction/useChainReactionGame";
-import { getRecommendedSize } from "#/features/chain-reaction/utils/recommendedSize";
-import ChainReactionBoard from "./ChainReactionBoard";
+} from "#/features/atomr/ai-worker-client";
+import {
+	getActivePlayerOrder,
+	PLAYER_COLORS,
+} from "#/features/atomr/constants";
+import type { PlayerId } from "#/features/atomr/types";
+import { useAtomRGame } from "#/features/atomr/useAtomRGame";
+import { getRecommendedSize } from "#/features/atomr/utils/recommendedSize";
+import AtomRBoard from "./AtomRBoard";
 import GameHud from "./GameHud";
 import GameOverlay from "./GameOverlay";
 import GameSettings from "./GameSettings";
 
-const PLAYER_NAMES = {
-	p1: "Player",
-	p2: "CPU",
-} as const;
+function getAiNames(playerCount: number): Partial<Record<PlayerId, string>> {
+	return Object.fromEntries(
+		getActivePlayerOrder(playerCount).map((playerId, index) => [
+			playerId,
+			`CPU ${index + 1}`,
+		]),
+	) as Partial<Record<PlayerId, string>>;
+}
 
-export default function AiPlayScreen() {
+export default function AiBattleScreen() {
 	const [rows, setRows] = useState(6);
 	const [cols, setCols] = useState(9);
-	const [difficulty, setDifficulty] = useState(5);
+	const [playerCount, setPlayerCount] = useState(4);
+	const [difficulty, setDifficulty] = useState(6);
 	const [settingsOpen, setSettingsOpen] = useState(false);
-	const [isCpuThinking, setIsCpuThinking] = useState(false);
 	const [settingsResetToken, setSettingsResetToken] = useState(0);
 
 	useEffect(() => {
@@ -47,7 +56,7 @@ export default function AiPlayScreen() {
 		activeCaptureKeys,
 		activeExplosions,
 		lastMove,
-	} = useChainReactionGame(rows, cols, 2, settingsResetToken);
+	} = useAtomRGame(rows, cols, playerCount, settingsResetToken);
 
 	const cpuTimerRef = useRef<number | null>(null);
 	const cpuTaskRef = useRef<AiMoveTask | null>(null);
@@ -67,17 +76,16 @@ export default function AiPlayScreen() {
 	useEffect(() => {
 		clearCpuTimer();
 		cancelCpuTask();
-		setIsCpuThinking(false);
 
 		if (
 			resolvedState.phase !== "idle" ||
-			resolvedState.currentPlayer !== "p2"
+			resolvedState.winner ||
+			resolvedState.isDraw
 		) {
 			return;
 		}
 
 		const { thinkDelayMs } = configForDifficulty(difficulty);
-		setIsCpuThinking(true);
 		cpuTimerRef.current = window.setTimeout(() => {
 			cpuTimerRef.current = null;
 			const task = requestCpuMove(resolvedState, difficulty);
@@ -85,14 +93,10 @@ export default function AiPlayScreen() {
 			void task.promise
 				.then((move) => {
 					if (cpuTaskRef.current !== task) return;
-					setIsCpuThinking(false);
 					if (!move) return;
 					handleMove(move);
 				})
-				.catch(() => {
-					if (cpuTaskRef.current !== task) return;
-					setIsCpuThinking(false);
-				})
+				.catch(() => {})
 				.finally(() => {
 					if (cpuTaskRef.current === task) {
 						cpuTaskRef.current = null;
@@ -154,6 +158,7 @@ export default function AiPlayScreen() {
 	const hudStyle: React.CSSProperties = boardDims
 		? { width: `${boardDims.w}px`, maxWidth: "100%" }
 		: { width: "100%", maxWidth: "100%" };
+	const playerNames = useMemo(() => getAiNames(playerCount), [playerCount]);
 	return (
 		<main
 			className="relative flex h-[100dvh] flex-col overflow-hidden px-3 pt-5 pb-4"
@@ -186,7 +191,7 @@ export default function AiPlayScreen() {
 				className="relative flex min-h-0 flex-1 items-center justify-center"
 			>
 				<div style={boardStyle} className="relative">
-					<ChainReactionBoard
+					<AtomRBoard
 						state={state}
 						activeColor={activeColor}
 						isAnimating={isAnimating}
@@ -195,32 +200,33 @@ export default function AiPlayScreen() {
 						activeExplosions={activeExplosions}
 						cellSize={cellSize}
 						lastMove={lastMove}
-						onPlay={(row, col) => {
-							if (isCpuThinking || resolvedState.currentPlayer !== "p1") return;
-							handleMove({ row, col });
-						}}
+						onPlay={() => {}}
 					/>
 					<GameOverlay
 						state={state}
 						onReset={reset}
-						playerNames={PLAYER_NAMES}
+						resetLabel="run again"
+						playerNames={playerNames}
 					/>
 				</div>
 			</div>
-
 			<GameSettings
 				open={settingsOpen}
 				rows={rows}
 				cols={cols}
-				playerCount={2}
+				playerCount={playerCount}
+				playerCountLocked={false}
 				difficulty={difficulty}
-				onApply={(newRows, newCols, newDifficulty) => {
+				onApply={(newRows, newCols, newDifficulty, newPlayerCount) => {
 					clearCpuTimer();
-					setIsCpuThinking(false);
+					cancelCpuTask();
 					setRows(newRows);
 					setCols(newCols);
 					if (newDifficulty !== undefined) {
 						setDifficulty(newDifficulty);
+					}
+					if (newPlayerCount !== undefined) {
+						setPlayerCount(newPlayerCount);
 					}
 					setSettingsResetToken((token) => token + 1);
 				}}

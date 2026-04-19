@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getRecommendedSize } from "#/features/chain-reaction/utils/recommendedSize";
+import { getRecommendedSize } from "#/features/atomr/utils/recommendedSize";
 
 type GameSettingsProps = {
 	open: boolean;

@@ -22,7 +22,7 @@ function withState(overrides: Partial<GameState>): GameState {
 	};
 }
 
-describe("chain reaction engine", () => {
+describe("AtomR engine", () => {
 	it("returns correct capacities for corner, edge, and inner cells", () => {
 		expect(getCapacity(0, 0, 6, 9)).toBe(2);
 		expect(getCapacity(0, 4, 6, 9)).toBe(3);
@@ -99,7 +99,7 @@ describe("chain reaction engine", () => {
 		).toBe(true);
 	});
 
-	it("resolves multi-step chain reactions to stable board", () => {
+	it("resolves multi-step cascades to stable board", () => {
 		const state = createInitialGameState(3, 3);
 		state.board[1][1] = { owner: "p1", count: 3 };
 		state.board[0][1] = { owner: "p1", count: 2 };

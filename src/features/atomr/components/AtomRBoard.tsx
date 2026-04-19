@@ -1,10 +1,10 @@
 import { isLegalMove } from "../engine";
 import type { GameState, LastMove, PlayerId, Position } from "../types";
-import type { ActiveExplosion } from "../useChainReactionGame";
-import ChainReactionCell from "./ChainReactionCell";
+import type { ActiveExplosion } from "../useAtomRGame";
+import AtomRCell from "./AtomRCell";
 import FlyingOrbOverlay from "./FlyingOrbOverlay";
 
-type ChainReactionBoardProps = {
+type AtomRBoardProps = {
 	state: GameState;
 	activeColor: string;
 	isAnimating: boolean;
@@ -18,7 +18,7 @@ type ChainReactionBoardProps = {
 	onPlay: (row: number, col: number) => void;
 };
 
-export default function ChainReactionBoard({
+export default function AtomRBoard({
 	state,
 	activeColor,
 	isAnimating,
@@ -30,7 +30,7 @@ export default function ChainReactionBoard({
 	suggestedMove,
 	suggestedPlayer,
 	onPlay,
-}: ChainReactionBoardProps) {
+}: AtomRBoardProps) {
 	const explosionSet = new Set(activeExplosionKeys);
 	const captureSet = new Set(activeCaptureKeys);
 	const cells = [];
@@ -39,7 +39,7 @@ export default function ChainReactionBoard({
 		for (let col = 0; col < state.cols; col += 1) {
 			const positionKey = `${row}:${col}`;
 			cells.push(
-				<ChainReactionCell
+				<AtomRCell
 					key={`cell-${row}-${col}`}
 					state={state}
 					cell={state.board[row][col]}

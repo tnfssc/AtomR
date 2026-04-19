@@ -9,10 +9,10 @@ import {
 	useRef,
 	useState,
 } from "react";
-import ChainReactionBoard from "#/features/chain-reaction/components/ChainReactionBoard";
-import GameOverlay from "#/features/chain-reaction/components/GameOverlay";
-import { PLAYER_COLORS } from "#/features/chain-reaction/constants";
-import { getCapacity } from "#/features/chain-reaction/engine";
+import AtomRBoard from "#/features/atomr/components/AtomRBoard";
+import GameOverlay from "#/features/atomr/components/GameOverlay";
+import { PLAYER_COLORS } from "#/features/atomr/constants";
+import { getCapacity } from "#/features/atomr/engine";
 import {
 	type Board,
 	type GameState,
@@ -20,9 +20,9 @@ import {
 	ONLINE_TURN_TIME_LIMIT_MS,
 	ONLINE_VIEWER_HEARTBEAT_MS,
 	type PlayerId,
-} from "#/features/chain-reaction/shared";
-import { useResolvedGamePlayback } from "#/features/chain-reaction/useResolvedGamePlayback";
-import { getRecommendedSize } from "#/features/chain-reaction/utils/recommendedSize";
+} from "#/features/atomr/shared";
+import { useResolvedGamePlayback } from "#/features/atomr/useResolvedGamePlayback";
+import { getRecommendedSize } from "#/features/atomr/utils/recommendedSize";
 import { authClient } from "#/lib/auth-client";
 import { requireSessionFn } from "#/lib/session-fns";
 import { api } from "../../../convex/_generated/api";
@@ -476,7 +476,7 @@ function MatchPage() {
 				className="relative flex-1 min-h-0 flex items-center justify-center"
 			>
 				<div style={boardStyle} className="relative">
-					<ChainReactionBoard
+					<AtomRBoard
 						state={displayState}
 						activeColor={activeColor}
 						isAnimating={isAnimating}

@@ -1,6 +1,6 @@
-# Atom Reaction
+# AtomR
 
-> A turn-based chain-reaction board game — play locally, online, or against AI.
+> A turn-based AtomR board game — play locally, online, or against AI.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
@@ -40,8 +40,8 @@
 ### Installation
 
 ```bash
-git clone https://github.com/tnfssc/atom-reaction.git
-cd atom-reaction
+git clone https://github.com/tnfssc/atomr.git
+cd atomr
 pnpm install
 cp .env.example .env.local
 ```

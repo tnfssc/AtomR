@@ -1,4 +1,4 @@
-# Chain Reaction AI Research (AI Mode)
+# AtomR AI Research (AI Mode)
 
 ## Objective
 
@@ -12,7 +12,7 @@ Constraints from product direction:
 
 ## Summary Recommendation
 
-Primary recommendation: **depth-limited Minimax + alpha-beta pruning + chain-reaction-specific heuristic + controlled stochasticity**.
+Primary recommendation: **depth-limited Minimax + alpha-beta pruning + AtomR-specific heuristic + controlled stochasticity**.
 
 Why this is the best fit now:
 
@@ -27,13 +27,13 @@ Secondary/fallback recommendation: **optional TensorFlow.js policy head later**,
 
 ### 1) Strong baseline for this game type is minimax with alpha-beta
 
-- Chain Reaction community implementations repeatedly use minimax + alpha-beta.
+- AtomR community implementations repeatedly use minimax + alpha-beta.
 - Move ordering / transposition tables / iterative deepening are known multipliers for alpha-beta performance.
 
 Sources:
 
-- https://github.com/keshavlingala/ChainReactionMinMax
-- https://github.com/shamiul94/Chain-Reaction-Game-AI-Bot
+- example open-source minimax implementation for this ruleset
+- example open-source alpha-beta bot for this ruleset
 - https://www.chessprogramming.org/Alpha-Beta
 - https://www.chessprogramming.org/Move_Ordering
 - https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
@@ -43,14 +43,14 @@ Credibility:
 - chessprogramming/wiki: medium-high (well-established references for adversarial search)
 - game-specific repos: medium to low (implementation quality varies)
 
-### 2) Orb-count-only heuristic is weak in Chain Reaction
+### 2) Orb-count-only heuristic is weak in AtomR
 
 - Multiple sources note that naive piece count can be misleading because swings happen from critical cells and chain instability.
 
 Sources:
 
-- https://brilliant.org/wiki/chain-reaction-game/
-- https://keshav.codes/chainreaction/
+- general gameplay and rules overview
+- independent gameplay and AI write-up
 
 Implication:
 

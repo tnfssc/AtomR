@@ -8,7 +8,7 @@ import { api } from "../../convex/_generated/api";
 export const Route = createFileRoute("/")({
 	head: () => ({
 		meta: [
-			{ title: "Atom Reaction" },
+			{ title: "AtomR" },
 			{
 				name: "description",
 				content:
@@ -87,7 +87,7 @@ function HomePage() {
 						</div>
 
 						<h1 className="max-w-[8ch] text-[3.2rem] leading-[0.88] font-semibold tracking-[-0.08em] text-white sm:text-[4.8rem] lg:text-[6.1rem]">
-							Turn-based chain reactions.
+							Turn-based cascades.
 						</h1>
 						<p className="mt-4 max-w-[34ch] text-[15px] leading-7 text-white/56 sm:text-[16px]">
 							Place orbs. Capture cells. Clear the board.

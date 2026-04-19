@@ -1,16 +1,16 @@
 import { useId } from "react";
 
-type AtomReactionMarkProps = {
+type AtomRMarkProps = {
 	size?: number;
 	title?: string;
 	className?: string;
 };
 
-export default function AtomReactionMark({
+export default function AtomRMark({
 	size = 24,
 	title,
 	className,
-}: AtomReactionMarkProps) {
+}: AtomRMarkProps) {
 	const id = useId();
 	const frameId = `${id}-frame`;
 	const burstId = `${id}-burst`;

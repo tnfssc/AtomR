@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import AiPlayScreen from "#/features/chain-reaction/components/AiPlayScreen";
+import AiPlayScreen from "#/features/atomr/components/AiPlayScreen";
 
 export const Route = createFileRoute("/play/ai")({
 	component: AiPlayRoute,

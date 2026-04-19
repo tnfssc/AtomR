@@ -1,7 +1,7 @@
 {
-  "name": "atom-reaction",
+  "name": "atomr",
   "private": true,
-  "description": "Turn-based chain-reaction board game built with TanStack Start, Convex, and Better Auth.",
+  "description": "Turn-based AtomR board game built with TanStack Start, Convex, and Better Auth.",
   "type": "module",
   "imports": {
     "#/*": "./src/*"

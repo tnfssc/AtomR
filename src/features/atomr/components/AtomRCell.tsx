@@ -2,7 +2,7 @@ import { PLAYER_COLORS } from "../constants";
 import { isCellCritical } from "../selectors";
 import type { Cell, GameState, PlayerId, Position } from "../types";
 
-type ChainReactionCellProps = {
+type AtomRCellProps = {
 	state: GameState;
 	cell: Cell;
 	position: Position;
@@ -87,7 +87,7 @@ function OrbDisplay({
 	);
 }
 
-export default function ChainReactionCell({
+export default function AtomRCell({
 	state,
 	cell,
 	position,
@@ -100,7 +100,7 @@ export default function ChainReactionCell({
 	isSuggested,
 	suggestedPlayer,
 	onPlay,
-}: ChainReactionCellProps) {
+}: AtomRCellProps) {
 	const ownerColor = cell.owner ? PLAYER_COLORS[cell.owner] : null;
 	const suggestionColor = suggestedPlayer
 		? PLAYER_COLORS[suggestedPlayer]

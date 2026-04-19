@@ -16,7 +16,7 @@ code {
   font-family: 'JetBrains Mono', 'Courier New', monospace;
 }
 
-/* Atom Reaction Dark Theme */
+/* AtomR Dark Theme */
 :root {
   /* Base */
   --background: oklch(0.05 0.005 265);
@@ -121,7 +121,7 @@ code {
   }
 }
 
-/* Atom Reaction game animations */
+/* AtomR game animations */
 
 /* Critical ring — fast dramatic pulse on the inner border */
 @keyframes cr-critical-pulse {

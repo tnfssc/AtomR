@@ -1,5 +1,5 @@
 import { PLAYER_COLORS } from "../constants";
-import type { ActiveExplosion } from "../useChainReactionGame";
+import type { ActiveExplosion } from "../useAtomRGame";
 
 type FlyingOrbOverlayProps = {
 	activeExplosions: ActiveExplosion[];

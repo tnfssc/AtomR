@@ -1,8 +1,8 @@
-# Chain Reaction Android Game
+# AtomR Android Game
 
 ## Summary
 
-Chain Reaction is turn-based strategy board game originally developed for Android by Buddy-Matt Entertainment. Goal: control board by eliminating every other player's orbs.
+AtomR is turn-based strategy board game originally developed for Android by Buddy-Matt Entertainment. Goal: control board by eliminating every other player's orbs.
 
 Game often described as deterministic combinatorial game of perfect information. No hidden state. No randomness. Strong position can flip fast because one explosion can convert large part of board.
 
@@ -19,7 +19,7 @@ Game often described as deterministic combinatorial game of perfect information.
 - When orb count in cell reaches critical mass, cell explodes.
 - Explosion sends `1` orb to each orthogonal neighbor.
 - Neighbor cells hit by explosion convert to exploding player's color.
-- Explosions can trigger more explosions. This is chain reaction.
+- Explosions can trigger more explosions in the same turn.
 - Player loses after all their orbs removed from board.
 - Winner is last player with orbs remaining.
 
@@ -161,7 +161,7 @@ If building own version, lock these down early:
 
 ## Product Implications For This Repo
 
-If this repo is building inspired or derivative version of Chain Reaction, core product should likely support:
+If this repo is building inspired or derivative version of AtomR, core product should likely support:
 
 - Configurable board size
 - `2` to `8` players or at least solid `2` player mode first
@@ -209,7 +209,7 @@ Good v2:
 
 ## Sources
 
-- Google Play listing for original Android game: `https://play.google.com/store/apps/details?id=com.BuddyMattEnt.ChainReaction`
-- Brilliant summary and rules overview: `https://brilliant.org/wiki/chain-reaction-game/`
-- University of Delhi project write-up summarizing rules and AI approach: `http://www.cic.du.ac.in/userfiles/downloads/ProjectBooklets/Chain%20Reaction%20Game.pdf`
-- Independent gameplay/AI summary: `https://keshav.codes/chainreaction/`
+- Original Android release listing
+- Rules overview and tactics summary
+- University project write-up covering rules and AI approach
+- Independent gameplay and AI summary

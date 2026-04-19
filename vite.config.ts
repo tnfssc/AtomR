@@ -36,16 +36,16 @@ const config = defineConfig({
 			strategies: "generateSW",
 			outDir: ".output/public",
 			manifest: {
-				name: "Atom Reaction",
-				short_name: "Atom Reaction",
-				description: "A chain reaction strategy game",
+				name: "AtomR",
+				short_name: "AtomR",
+				description: "A turn-based AtomR strategy game",
 				theme_color: "#07070b",
 				background_color: "#07070b",
 				display: "standalone",
 				start_url: "/",
 				icons: [
 					{
-						src: "/brand/atom-reaction-mark.svg",
+						src: "/brand/atomr-mark.svg",
 						sizes: "any",
 						type: "image/svg+xml",
 						purpose: "any",

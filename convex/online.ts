@@ -6,18 +6,18 @@ import {
 	applyMove,
 	createInitialGameState,
 	pickRandomLegalMove,
-} from '../src/features/chain-reaction/shared-engine'
+} from '../src/features/atomr/shared-engine'
 import {
 	ONLINE_TURN_TIME_LIMIT_MS,
 	createPlayerFlags,
 	type GameState,
 	type PlayerId,
-} from '../src/features/chain-reaction/shared'
+} from '../src/features/atomr/shared'
 import {
 	evaluateSearchingQueue,
 	isMatchedQueueEntryObsolete as isMatchedQueueEntryObsoleteRule,
 	isSearchingQueueEntryStale,
-} from '../src/features/chain-reaction/onlineMatchmaking'
+} from '../src/features/atomr/onlineMatchmaking'
 
 const MIN_PRIVATE_ROWS = 3
 const MAX_PRIVATE_ROWS = 12

@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import LocalPlayScreen from "#/features/chain-reaction/components/LocalPlayScreen";
+import LocalPlayScreen from "#/features/atomr/components/LocalPlayScreen";
 
 export const Route = createFileRoute("/play/local")({
 	component: LocalPlayRoute,

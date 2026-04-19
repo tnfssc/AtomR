@@ -255,7 +255,7 @@ function buildPlaybackSteps(
 	return steps;
 }
 
-export function useChainReactionGame(
+export function useAtomRGame(
 	rows = 6,
 	cols = 9,
 	playerCount = 2,

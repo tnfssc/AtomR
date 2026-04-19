@@ -5,7 +5,7 @@ import {
 	useNavigate,
 } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import AtomReactionMark from "#/components/brand/AtomReactionMark";
+import AtomRMark from "#/components/brand/AtomRMark";
 import { authClient } from "#/lib/auth-client";
 import { type AuthModes, getAuthModesFn } from "#/lib/auth-mode-fns";
 import { getSessionFn } from "#/lib/session-fns";
@@ -178,7 +178,7 @@ function SignInPage() {
 							gap: 12,
 						}}
 					>
-						<AtomReactionMark size={40} title="Atom Reaction logo" />
+						<AtomRMark size={40} title="AtomR logo" />
 						<span
 							style={{
 								fontSize: 12,
@@ -188,7 +188,7 @@ function SignInPage() {
 								textTransform: "uppercase",
 							}}
 						>
-							Atom Reaction
+							AtomR
 						</span>
 					</Link>
 				</div>

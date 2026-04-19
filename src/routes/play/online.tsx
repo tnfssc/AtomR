@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMutation, useQuery } from "convex/react";
 import { useEffect, useEffectEvent, useState } from "react";
-import { ONLINE_VIEWER_HEARTBEAT_MS } from "#/features/chain-reaction/shared";
+import { ONLINE_VIEWER_HEARTBEAT_MS } from "#/features/atomr/shared";
 import { authClient } from "#/lib/auth-client";
 import { requireSessionFn } from "#/lib/session-fns";
 import { api } from "../../../convex/_generated/api";

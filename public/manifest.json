@@ -1,10 +1,10 @@
 {
-  "name": "Atom Reaction",
-  "short_name": "Atom Reaction",
-  "description": "Turn-based chain-reaction board game.",
+  "name": "AtomR",
+  "short_name": "AtomR",
+  "description": "Turn-based AtomR board game.",
   "icons": [
     {
-      "src": "/brand/atom-reaction-mark.svg",
+      "src": "/brand/atomr-mark.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any"

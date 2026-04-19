@@ -16,7 +16,7 @@ import {
 export const Route = createFileRoute("/play")({
 	head: () => ({
 		meta: [
-			{ title: "Atom Reaction" },
+			{ title: "AtomR" },
 			{ name: "description", content: "Choose a mode and launch." },
 		],
 	}),

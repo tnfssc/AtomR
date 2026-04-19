@@ -1,10 +1,10 @@
-# Chain Reaction Playability Research
+# AtomR Playability Research
 
 ## Purpose
 
-Research-backed guidance for turning current Chain Reaction prototype into playable, readable, modern game.
+Research-backed guidance for turning current AtomR prototype into playable, readable, modern game.
 
-This document supports implementation plan in `.plans/chain-reaction-playability-roadmap.md`.
+This document supports implementation plan in `.plans/atomr-playability-roadmap.md`.
 
 ## High-Level Conclusions
 
@@ -12,7 +12,7 @@ Best path is not "add more features" first. Best path is:
 
 1. remove unrelated app chrome from `/play`
 2. improve board readability and threat visibility
-3. animate chain reactions to explain causality
+3. animate cascades to explain causality
 4. strengthen turn/winner feedback
 5. tune phone layout and tap ergonomics
 
@@ -39,7 +39,7 @@ Recommended approaches from TanStack/React routing guidance:
 
 - Hide header/footer on `/play`.
 - Keep root shell responsible for this decision. Do not let game route manually hide global UI via DOM hacks.
-- Set route title to `Chain Reaction`.
+- Set route title to `AtomR`.
 - Use one dedicated main landmark for game route.
 - Prefer `100dvh` with `100vh` fallback for height.
 - Add `viewport-fit=cover` support and safe-area padding where needed.
@@ -103,7 +103,7 @@ Text-only explanation is weaker than direct board affordance.
 
 ### Product Decision
 
-Because Chain Reaction has many legal cells at once, always-on legal highlighting should be subtle, not loud. Strong highlighting should be reserved for hover/press/current target.
+Because AtomR has many legal cells at once, always-on legal highlighting should be subtle, not loud. Strong highlighting should be reserved for hover/press/current target.
 
 ## 4. Critical And Threat State Indication
 
@@ -296,7 +296,7 @@ If board only feels good on desktop, product is not done.
 
 Optional deeper research later:
 
-- compare chain-reaction implementations visually for best orb arrangements
+- compare atomr implementations visually for best orb arrangements
 - review reduced-motion UX patterns for tactical games
 - study sound design patterns for small deterministic games
 
