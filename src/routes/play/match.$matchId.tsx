@@ -58,7 +58,10 @@ function MatchPage() {
 		null,
 	);
 	const user = session?.user ?? null;
-	const viewerPlayerId = match?.viewerPlayerId ?? null;
+	const viewerPlayerId: PlayerId | null =
+		match?.viewerPlayerId === "p1" || match?.viewerPlayerId === "p2"
+			? match.viewerPlayerId
+			: null;
 
 	const heartbeatViewer = useEffectEvent(async () => {
 		if (!user) return;
