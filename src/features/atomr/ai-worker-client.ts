@@ -17,7 +17,6 @@ type MoveWorkerRequest = Extract<
 	{ kind: "cpu" | "recommended" }
 >;
 
-const PARALLEL_CPU_DIFFICULTY = 10;
 const MIN_PARALLEL_MOVES = 4;
 const MAX_PARALLEL_WORKERS = 4;
 
@@ -333,7 +332,7 @@ function requestParallelCpuMove(
 }
 
 export function requestCpuMove(state: GameState, difficulty: number) {
-	if (difficulty >= PARALLEL_CPU_DIFFICULTY && canUseWorkerThreads()) {
+	if (canUseWorkerThreads()) {
 		return requestParallelCpuMove(state, difficulty);
 	}
 

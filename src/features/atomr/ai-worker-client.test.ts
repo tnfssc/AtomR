@@ -109,7 +109,7 @@ describe("ai worker client", () => {
 		await expect(task.promise).resolves.toEqual({ row: 1, col: 2 });
 	});
 
-	it("fans out level-10 CPU search across multiple workers and returns before serial batch delays add up", async () => {
+	it("fans out non-level-10 CPU search across multiple workers and returns before serial batch delays add up", async () => {
 		const batchDelayMs = 50;
 
 		vi.stubGlobal("window", {});
@@ -120,7 +120,7 @@ describe("ai worker client", () => {
 
 		const { requestCpuMove } = await import("./ai-worker-client");
 		const startedAt = performance.now();
-		const task = requestCpuMove(createState(), 10);
+		const task = requestCpuMove(createState(), 5);
 		const move = await task.promise;
 		const elapsedMs = performance.now() - startedAt;
 

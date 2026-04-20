@@ -68,7 +68,7 @@ describe("chooseCpuMove", () => {
 		expect(move).toEqual({ row: 1, col: 1 });
 	});
 
-	it("rebuilds the same level-10 move from split root-search batches", () => {
+	it("rebuilds the same CPU move from split root-search batches across every difficulty", () => {
 		const state: GameState = {
 			board: [
 				[
@@ -98,17 +98,19 @@ describe("chooseCpuMove", () => {
 			phase: "idle",
 		};
 
-		const plan = createCpuSearchPlan(state, 10);
-		const evenMoves = plan.orderedMoves.filter((_, index) => index % 2 === 0);
-		const oddMoves = plan.orderedMoves.filter((_, index) => index % 2 === 1);
-		const scored = [
-			...scoreCpuMoves(state, 10, evenMoves),
-			...scoreCpuMoves(state, 10, oddMoves),
-		];
+		for (let difficulty = 1; difficulty <= 10; difficulty += 1) {
+			const plan = createCpuSearchPlan(state, difficulty);
+			const evenMoves = plan.orderedMoves.filter((_, index) => index % 2 === 0);
+			const oddMoves = plan.orderedMoves.filter((_, index) => index % 2 === 1);
+			const scored = [
+				...scoreCpuMoves(state, difficulty, evenMoves),
+				...scoreCpuMoves(state, difficulty, oddMoves),
+			];
 
-		expect(pickCpuMoveFromScores(plan, scored, () => 0.99)).toEqual(
-			chooseCpuMove(state, 10, () => 0.99),
-		);
+			expect(pickCpuMoveFromScores(plan, scored, () => 0.99)).toEqual(
+				chooseCpuMove(state, difficulty, () => 0.99),
+			);
+		}
 	});
 
 	it("returns a legal recommendation on a crowded 3x4 late-game board", () => {
