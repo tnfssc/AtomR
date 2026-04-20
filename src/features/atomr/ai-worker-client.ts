@@ -186,6 +186,15 @@ function requestParallelCpuMove(
 	state: GameState,
 	difficulty: number,
 ): AiMoveTask {
+	if (
+		!canUseWorkerThreads() ||
+		getParallelWorkerCount(state.rows * state.cols) < 2
+	) {
+		return requestMove({ kind: "cpu", state, difficulty }, async () =>
+			(await import("./ai")).chooseCpuMove(state, difficulty),
+		);
+	}
+
 	const workers: Worker[] = [];
 	let cancelled = false;
 	let settled = false;
