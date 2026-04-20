@@ -153,7 +153,11 @@ function requestMove(
 }
 
 function getParallelWorkerCount(moveCount: number) {
-	if (moveCount < MIN_PARALLEL_MOVES || typeof navigator === "undefined") {
+	if (
+		moveCount < MIN_PARALLEL_MOVES ||
+		!canUseWorkerThreads() ||
+		typeof navigator === "undefined"
+	) {
 		return 1;
 	}
 
@@ -212,8 +216,12 @@ function requestParallelCpuMove(
 
 		void (async () => {
 			try {
-				const { chooseCpuMove, createCpuSearchPlan, pickCpuMoveFromScores } =
-					await import("./ai");
+				const {
+					chooseCpuMove,
+					createCpuSearchPlan,
+					maybeChooseCpuMistake,
+					pickCpuMoveFromScores,
+				} = await import("./ai");
 
 				if (cancelled) {
 					finishReject(createCancellationError());
@@ -226,12 +234,9 @@ function requestParallelCpuMove(
 					return;
 				}
 
-				if (Math.random() < plan.config.mistakeProbability) {
-					const index = Math.min(
-						plan.legalMoves.length - 1,
-						Math.floor(Math.random() * plan.legalMoves.length),
-					);
-					finishResolve(plan.legalMoves[index] ?? null);
+				const mistakeMove = maybeChooseCpuMistake(plan);
+				if (mistakeMove) {
+					finishResolve(mistakeMove);
 					return;
 				}
 

@@ -247,6 +247,14 @@ function moveKey(move: Position) {
 	return `${move.row}:${move.col}`;
 }
 
+function pickRandomMove(legalMoves: Position[], random: () => number) {
+	const index = Math.min(
+		legalMoves.length - 1,
+		Math.floor(random() * legalMoves.length),
+	);
+	return legalMoves[index] ?? null;
+}
+
 function shouldStopSearch(control: SearchControl): boolean {
 	if (control.exhausted) return true;
 
@@ -496,6 +504,15 @@ export function pickCpuMoveFromScores(
 	);
 }
 
+export function maybeChooseCpuMistake(
+	plan: Pick<CpuSearchPlan, "config" | "legalMoves">,
+	random = Math.random,
+): Position | null {
+	if (plan.legalMoves.length === 0) return null;
+	if (random() >= plan.config.mistakeProbability) return null;
+	return pickRandomMove(plan.legalMoves, random);
+}
+
 function chooseMoveWithConfig(
 	state: GameState,
 	config: AiConfig,
@@ -506,11 +523,7 @@ function chooseMoveWithConfig(
 	if (legalMoves.length === 0) return null;
 
 	if (options.allowMistakes && random() < config.mistakeProbability) {
-		const index = Math.min(
-			legalMoves.length - 1,
-			Math.floor(random() * legalMoves.length),
-		);
-		return legalMoves[index] ?? null;
+		return pickRandomMove(legalMoves, random);
 	}
 
 	const orderedMoves = orderCandidateMoves(
@@ -530,13 +543,8 @@ export function chooseCpuMove(
 	const plan = createCpuSearchPlan(state, difficulty);
 	if (plan.legalMoves.length === 0) return null;
 
-	if (random() < plan.config.mistakeProbability) {
-		const index = Math.min(
-			plan.legalMoves.length - 1,
-			Math.floor(random() * plan.legalMoves.length),
-		);
-		return plan.legalMoves[index] ?? null;
-	}
+	const mistakeMove = maybeChooseCpuMistake(plan, random);
+	if (mistakeMove) return mistakeMove;
 
 	return pickCpuMoveFromScores(
 		plan,
