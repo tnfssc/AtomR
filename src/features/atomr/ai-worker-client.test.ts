@@ -78,6 +78,7 @@ describe("ai worker client", () => {
 
 	afterEach(() => {
 		vi.restoreAllMocks();
+		vi.doUnmock("./ai");
 		vi.unstubAllGlobals();
 	});
 
@@ -110,24 +111,108 @@ describe("ai worker client", () => {
 		await expect(task.promise).resolves.toEqual({ row: 1, col: 2 });
 	});
 
-	it("fans out non-level-10 CPU search across multiple workers and returns before serial batch delays add up", async () => {
-		const batchDelayMs = 50;
-
+	it("falls back to a single worker when a parallel search plan has fewer than two root moves", async () => {
 		vi.stubGlobal("window", {});
 		vi.stubGlobal("Worker", FakeWorker);
 		vi.stubGlobal("navigator", { hardwareConcurrency: 8 });
-		vi.spyOn(Math, "random").mockReturnValue(0.5);
-		FakeWorker.batchDelayMs = batchDelayMs;
+		vi.doMock("./ai", () => ({
+			chooseCpuMove: vi.fn().mockReturnValue({ row: 0, col: 0 }),
+			createCpuSearchPlan: vi.fn().mockReturnValue({
+				difficulty: 5,
+				config: {
+					depth: 2,
+					candidateLimit: 12,
+					mistakeProbability: 0,
+					softmaxTemperature: 0.55,
+					thinkDelayMs: 300,
+				},
+				legalMoves: [{ row: 0, col: 0 }],
+				orderedMoves: [{ row: 0, col: 0 }],
+			}),
+			maybeChooseCpuMistake: vi.fn().mockReturnValue(null),
+			pickCpuMoveFromScores: vi.fn().mockReturnValue({ row: 0, col: 0 }),
+		}));
 
 		const { requestCpuMove } = await import("./ai-worker-client");
-		const startedAt = performance.now();
 		const task = requestCpuMove(createState(), 5);
-		const move = await task.promise;
-		const elapsedMs = performance.now() - startedAt;
+		await vi.waitFor(() => {
+			expect(FakeWorker.instances).toHaveLength(1);
+		});
+		const worker = FakeWorker.instances[0];
 
-		expect(FakeWorker.instances.length).toBeGreaterThan(1);
-		expect(elapsedMs).toBeLessThan(batchDelayMs * 2);
-		expect(move).toEqual({ row: 1, col: 1 });
+		expect(worker?.postedMessages).toHaveLength(1);
+		expect(worker?.postedMessages[0]).toMatchObject({ kind: "cpu" });
+
+		worker?.respond({ row: 0, col: 0 });
+
+		await expect(task.promise).resolves.toEqual({ row: 0, col: 0 });
+	});
+
+	it("fans out non-level-10 CPU search across multiple workers without waiting for serial batch delays", async () => {
+		const batchDelayMs = 50;
+
+		vi.useFakeTimers();
+
+		try {
+			vi.stubGlobal("window", {});
+			vi.stubGlobal("Worker", FakeWorker);
+			vi.stubGlobal("navigator", { hardwareConcurrency: 8 });
+			vi.doMock("./ai", () => ({
+				chooseCpuMove: vi.fn().mockReturnValue({ row: 1, col: 1 }),
+				createCpuSearchPlan: vi.fn().mockReturnValue({
+					difficulty: 5,
+					config: {
+						depth: 2,
+						candidateLimit: 12,
+						mistakeProbability: 0,
+						softmaxTemperature: 0.55,
+						thinkDelayMs: 300,
+					},
+					legalMoves: [
+						{ row: 0, col: 0 },
+						{ row: 0, col: 1 },
+						{ row: 1, col: 0 },
+						{ row: 1, col: 1 },
+					],
+					orderedMoves: [
+						{ row: 0, col: 0 },
+						{ row: 0, col: 1 },
+						{ row: 1, col: 0 },
+						{ row: 1, col: 1 },
+					],
+				}),
+				maybeChooseCpuMistake: vi.fn().mockReturnValue(null),
+				pickCpuMoveFromScores: vi
+					.fn()
+					.mockImplementation(
+						(_plan, scored: Array<{ move: Position }>) =>
+							scored.find(({ move }) => move.row === 1 && move.col === 1)?.move,
+					),
+			}));
+			FakeWorker.batchDelayMs = batchDelayMs;
+
+			const { requestCpuMove } = await import("./ai-worker-client");
+			const task = requestCpuMove(createState(), 5);
+			let settled = false;
+
+			void task.promise.finally(() => {
+				settled = true;
+			});
+			await Promise.resolve();
+			await Promise.resolve();
+
+			await vi.advanceTimersByTimeAsync(batchDelayMs - 1);
+
+			expect(FakeWorker.instances.length).toBeGreaterThan(1);
+			expect(settled).toBe(false);
+
+			await vi.advanceTimersByTimeAsync(1);
+
+			await expect(task.promise).resolves.toEqual({ row: 1, col: 1 });
+			expect(settled).toBe(true);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it("cancels in-flight work by terminating the worker and allows a fresh restart", async () => {

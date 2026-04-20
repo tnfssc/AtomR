@@ -198,6 +198,7 @@ function requestParallelCpuMove(
 	const workers: Worker[] = [];
 	let cancelled = false;
 	let settled = false;
+	let delegatedTask: AiMoveTask | null = null;
 	let finishRejectRef: ((error: Error) => void) | null = null;
 
 	const cleanup = () => {
@@ -251,7 +252,12 @@ function requestParallelCpuMove(
 
 				const workerCount = getParallelWorkerCount(plan.orderedMoves.length);
 				if (workerCount < 2) {
-					finishResolve(chooseCpuMove(state, difficulty));
+					const fallbackTask = requestMove(
+						{ kind: "cpu", state, difficulty },
+						async () => chooseCpuMove(state, difficulty),
+					);
+					delegatedTask = fallbackTask;
+					finishResolve(await fallbackTask.promise);
 					return;
 				}
 
@@ -327,6 +333,7 @@ function requestParallelCpuMove(
 		cancel: () => {
 			if (cancelled || settled) return;
 			cancelled = true;
+			delegatedTask?.cancel();
 			finishRejectRef?.(createCancellationError());
 		},
 	};
