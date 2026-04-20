@@ -23,6 +23,7 @@ function createState(
 
 class FakeWorker {
 	static instances: FakeWorker[] = [];
+	static batchDelayMs = 0;
 
 	onmessage: ((event: MessageEvent) => void) | null = null;
 	onerror: ((event: Event) => void) | null = null;
@@ -35,6 +36,21 @@ class FakeWorker {
 
 	postMessage(message: AiWorkerRequest) {
 		this.postedMessages.push(message);
+
+		if (message.kind === "scoreCpuBatch") {
+			setTimeout(() => {
+				if (this.terminated || !this.onmessage) return;
+				this.onmessage({
+					data: {
+						id: message.id,
+						scored: message.moves.map((move) => ({
+							move,
+							value: move.row === 1 && move.col === 1 ? 100 : 0,
+						})),
+					},
+				} as MessageEvent);
+			}, FakeWorker.batchDelayMs);
+		}
 	}
 
 	terminate() {
@@ -57,9 +73,11 @@ describe("ai worker client", () => {
 	beforeEach(() => {
 		vi.resetModules();
 		FakeWorker.instances = [];
+		FakeWorker.batchDelayMs = 0;
 	});
 
 	afterEach(() => {
+		vi.restoreAllMocks();
 		vi.unstubAllGlobals();
 	});
 
@@ -89,6 +107,26 @@ describe("ai worker client", () => {
 		worker?.respond({ row: 1, col: 2 });
 
 		await expect(task.promise).resolves.toEqual({ row: 1, col: 2 });
+	});
+
+	it("fans out level-10 CPU search across multiple workers and returns before serial batch delays add up", async () => {
+		const batchDelayMs = 50;
+
+		vi.stubGlobal("window", {});
+		vi.stubGlobal("Worker", FakeWorker);
+		vi.stubGlobal("navigator", { hardwareConcurrency: 8 });
+		vi.spyOn(Math, "random").mockReturnValue(0.5);
+		FakeWorker.batchDelayMs = batchDelayMs;
+
+		const { requestCpuMove } = await import("./ai-worker-client");
+		const startedAt = performance.now();
+		const task = requestCpuMove(createState(), 10);
+		const move = await task.promise;
+		const elapsedMs = performance.now() - startedAt;
+
+		expect(FakeWorker.instances.length).toBeGreaterThan(1);
+		expect(elapsedMs).toBeLessThan(batchDelayMs * 2);
+		expect(move).toEqual({ row: 1, col: 1 });
 	});
 
 	it("cancels in-flight work by terminating the worker and allows a fresh restart", async () => {

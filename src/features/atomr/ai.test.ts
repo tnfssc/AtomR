@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { chooseCpuMove, chooseRecommendedMove } from "./ai";
+import {
+	chooseCpuMove,
+	chooseRecommendedMove,
+	createCpuSearchPlan,
+	pickCpuMoveFromScores,
+	scoreCpuMoves,
+} from "./ai";
 import { getLegalMoves } from "./engine";
 import type { GameState } from "./types";
 
@@ -60,6 +66,49 @@ describe("chooseCpuMove", () => {
 		const move = chooseCpuMove(state, 10, () => 0.99);
 
 		expect(move).toEqual({ row: 1, col: 1 });
+	});
+
+	it("rebuilds the same level-10 move from split root-search batches", () => {
+		const state: GameState = {
+			board: [
+				[
+					{ owner: null, count: 0 },
+					{ owner: "p1", count: 1 },
+					{ owner: null, count: 0 },
+				],
+				[
+					{ owner: null, count: 0 },
+					{ owner: "p2", count: 3 },
+					{ owner: null, count: 0 },
+				],
+				[
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+					{ owner: null, count: 0 },
+				],
+			],
+			rows: 3,
+			cols: 3,
+			playerCount: 2,
+			currentPlayer: "p2",
+			turnNumber: 6,
+			hasPlayed: { p1: true, p2: true },
+			eliminated: { p1: false, p2: false },
+			winner: null,
+			phase: "idle",
+		};
+
+		const plan = createCpuSearchPlan(state, 10);
+		const evenMoves = plan.orderedMoves.filter((_, index) => index % 2 === 0);
+		const oddMoves = plan.orderedMoves.filter((_, index) => index % 2 === 1);
+		const scored = [
+			...scoreCpuMoves(state, 10, evenMoves),
+			...scoreCpuMoves(state, 10, oddMoves),
+		];
+
+		expect(pickCpuMoveFromScores(plan, scored, () => 0.99)).toEqual(
+			chooseCpuMove(state, 10, () => 0.99),
+		);
 	});
 
 	it("returns a legal recommendation on a crowded 3x4 late-game board", () => {

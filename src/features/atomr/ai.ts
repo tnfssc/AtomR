@@ -10,6 +10,18 @@ export type AiConfig = {
 	thinkDelayMs: number;
 };
 
+export type ScoredMove = {
+	move: Position;
+	value: number;
+};
+
+export type CpuSearchPlan = {
+	difficulty: number;
+	config: AiConfig;
+	legalMoves: Position[];
+	orderedMoves: Position[];
+};
+
 type MoveSelectionOptions = {
 	allowMistakes: boolean;
 	maxNodes?: number;
@@ -231,6 +243,10 @@ function boardKey(state: GameState): string {
 	return parts.join("|");
 }
 
+function moveKey(move: Position) {
+	return `${move.row}:${move.col}`;
+}
+
 function shouldStopSearch(control: SearchControl): boolean {
 	if (control.exhausted) return true;
 
@@ -319,6 +335,100 @@ function minimax(
 	return best;
 }
 
+function orderCandidateMoves(
+	state: GameState,
+	legalMoves: Position[],
+	candidateLimit: number,
+): Position[] {
+	return legalMoves
+		.map((move) => ({ move, score: quickMoveScore(state, move) }))
+		.sort((a, b) => b.score - a.score)
+		.slice(0, Math.max(1, candidateLimit))
+		.map((item) => item.move);
+}
+
+function scoreMovesWithConfig(
+	state: GameState,
+	config: AiConfig,
+	moves: Position[],
+	options: Pick<MoveSelectionOptions, "maxNodes" | "maxThinkMs"> = {},
+): ScoredMove[] {
+	const cache = new Map<string, { depth: number; value: number }>();
+	const control: SearchControl = {
+		nodes: 0,
+		exhausted: false,
+		maxNodes: options.maxNodes,
+		deadlineAt:
+			options.maxThinkMs !== undefined
+				? Date.now() + options.maxThinkMs
+				: undefined,
+	};
+	const scored: ScoredMove[] = [];
+
+	for (const move of moves) {
+		if (control.exhausted && scored.length > 0) break;
+		const next = applyMove(state, move.row, move.col).state;
+		const value = minimax(
+			next,
+			Math.max(0, config.depth - 1),
+			state.currentPlayer,
+			-Infinity,
+			Infinity,
+			config.candidateLimit,
+			cache,
+			control,
+		);
+		scored.push({ move, value });
+	}
+
+	return scored;
+}
+
+function pickMoveFromScores(
+	legalMoves: Position[],
+	orderedMoves: Position[],
+	scored: ScoredMove[],
+	config: AiConfig,
+	random: () => number,
+): Position | null {
+	if (scored.length === 0) {
+		return orderedMoves[0] ?? legalMoves[0] ?? null;
+	}
+
+	const scoredByMove = new Map(scored.map((item) => [moveKey(item.move), item.value]));
+	const orderedScored = orderedMoves.flatMap((move) => {
+		const value = scoredByMove.get(moveKey(move));
+		return value === undefined ? [] : [{ move, value }];
+	});
+
+	if (orderedScored.length === 0) {
+		return orderedMoves[0] ?? legalMoves[0] ?? null;
+	}
+
+	let bestScore = -Infinity;
+	for (const item of orderedScored) {
+		bestScore = Math.max(bestScore, item.value);
+	}
+
+	const topMoves = orderedScored.filter((item) => item.value >= bestScore - 6);
+	if (topMoves.length <= 1 || config.softmaxTemperature <= 0.01) {
+		return topMoves[0]?.move ?? orderedMoves[0] ?? legalMoves[0] ?? null;
+	}
+
+	const weights = topMoves.map((item) =>
+		Math.exp((item.value - bestScore) / config.softmaxTemperature),
+	);
+	const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
+	let pick = random() * totalWeight;
+
+	for (let i = 0; i < topMoves.length; i += 1) {
+		pick -= weights[i] ?? 0;
+		if (pick <= 0) return topMoves[i]?.move ?? legalMoves[0] ?? null;
+	}
+
+	return topMoves[topMoves.length - 1]?.move ?? legalMoves[0] ?? null;
+}
+
 export function configForDifficulty(level: number): AiConfig {
 	const clamped = Math.max(1, Math.min(10, level));
 	const depth = clamped <= 2 ? 1 : clamped <= 5 ? 2 : clamped <= 8 ? 3 : 4;
@@ -347,6 +457,43 @@ export function configForDifficulty(level: number): AiConfig {
 	};
 }
 
+export function createCpuSearchPlan(
+	state: GameState,
+	difficulty: number,
+): CpuSearchPlan {
+	const config = configForDifficulty(difficulty);
+	const legalMoves = getLegalMoves(state);
+
+	return {
+		difficulty,
+		config,
+		legalMoves,
+		orderedMoves: orderCandidateMoves(state, legalMoves, config.candidateLimit),
+	};
+}
+
+export function scoreCpuMoves(
+	state: GameState,
+	difficulty: number,
+	moves: Position[],
+): ScoredMove[] {
+	return scoreMovesWithConfig(state, configForDifficulty(difficulty), moves);
+}
+
+export function pickCpuMoveFromScores(
+	plan: CpuSearchPlan,
+	scored: ScoredMove[],
+	random = Math.random,
+): Position | null {
+	return pickMoveFromScores(
+		plan.legalMoves,
+		plan.orderedMoves,
+		scored,
+		plan.config,
+		random,
+	);
+}
+
 function chooseMoveWithConfig(
 	state: GameState,
 	config: AiConfig,
@@ -364,63 +511,9 @@ function chooseMoveWithConfig(
 		return legalMoves[index] ?? null;
 	}
 
-	const orderedMoves = legalMoves
-		.map((move) => ({ move, score: quickMoveScore(state, move) }))
-		.sort((a, b) => b.score - a.score)
-		.slice(0, Math.max(1, config.candidateLimit))
-		.map((item) => item.move);
-
-	const cache = new Map<string, { depth: number; value: number }>();
-	const control: SearchControl = {
-		nodes: 0,
-		exhausted: false,
-		maxNodes: options.maxNodes,
-		deadlineAt:
-			options.maxThinkMs !== undefined
-				? Date.now() + options.maxThinkMs
-				: undefined,
-	};
-	let bestScore = -Infinity;
-	const scored: Array<{ move: Position; value: number }> = [];
-
-	for (const move of orderedMoves) {
-		if (control.exhausted && scored.length > 0) break;
-		const next = applyMove(state, move.row, move.col).state;
-		const value = minimax(
-			next,
-			Math.max(0, config.depth - 1),
-			state.currentPlayer,
-			-Infinity,
-			Infinity,
-			config.candidateLimit,
-			cache,
-			control,
-		);
-		scored.push({ move, value });
-		if (value > bestScore) bestScore = value;
-	}
-
-	if (scored.length === 0) {
-		return orderedMoves[0] ?? legalMoves[0] ?? null;
-	}
-
-	const topMoves = scored.filter((item) => item.value >= bestScore - 6);
-	if (topMoves.length <= 1 || config.softmaxTemperature <= 0.01) {
-		return topMoves[0]?.move ?? orderedMoves[0] ?? legalMoves[0] ?? null;
-	}
-
-	const weights = topMoves.map((item) =>
-		Math.exp((item.value - bestScore) / config.softmaxTemperature),
-	);
-	const totalWeight = weights.reduce((acc, weight) => acc + weight, 0);
-	let pick = random() * totalWeight;
-
-	for (let i = 0; i < topMoves.length; i += 1) {
-		pick -= weights[i] ?? 0;
-		if (pick <= 0) return topMoves[i]?.move ?? legalMoves[0] ?? null;
-	}
-
-	return topMoves[topMoves.length - 1]?.move ?? legalMoves[0] ?? null;
+	const orderedMoves = orderCandidateMoves(state, legalMoves, config.candidateLimit);
+	const scored = scoreMovesWithConfig(state, config, orderedMoves, options);
+	return pickMoveFromScores(legalMoves, orderedMoves, scored, config, random);
 }
 
 export function chooseCpuMove(
@@ -428,9 +521,22 @@ export function chooseCpuMove(
 	difficulty: number,
 	random = Math.random,
 ): Position | null {
-	return chooseMoveWithConfig(state, configForDifficulty(difficulty), random, {
-		allowMistakes: true,
-	});
+	const plan = createCpuSearchPlan(state, difficulty);
+	if (plan.legalMoves.length === 0) return null;
+
+	if (random() < plan.config.mistakeProbability) {
+		const index = Math.min(
+			plan.legalMoves.length - 1,
+			Math.floor(random() * plan.legalMoves.length),
+		);
+		return plan.legalMoves[index] ?? null;
+	}
+
+	return pickCpuMoveFromScores(
+		plan,
+		scoreMovesWithConfig(state, plan.config, plan.orderedMoves),
+		random,
+	);
 }
 
 export function chooseRecommendedMove(
