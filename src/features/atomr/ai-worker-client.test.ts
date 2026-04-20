@@ -96,6 +96,7 @@ describe("ai worker client", () => {
 	it("resolves moves from the worker response", async () => {
 		vi.stubGlobal("window", {});
 		vi.stubGlobal("Worker", FakeWorker);
+		vi.stubGlobal("navigator", { hardwareConcurrency: 1 });
 
 		const { requestCpuMove } = await import("./ai-worker-client");
 		const task = requestCpuMove(createState(), 5);
@@ -132,15 +133,19 @@ describe("ai worker client", () => {
 	it("cancels in-flight work by terminating the worker and allows a fresh restart", async () => {
 		vi.stubGlobal("window", {});
 		vi.stubGlobal("Worker", FakeWorker);
+		vi.stubGlobal("navigator", { hardwareConcurrency: 1 });
 
 		const { requestCpuMove } = await import("./ai-worker-client");
 		const firstTask = requestCpuMove(createState(), 8);
 		const firstWorker = FakeWorker.instances[0];
+		const firstTaskRejection = expect(firstTask.promise).rejects.toThrow(
+			"AI request cancelled",
+		);
 
 		firstTask.cancel();
 
 		expect(firstWorker?.terminated).toBe(true);
-		await expect(firstTask.promise).rejects.toThrow("AI request cancelled");
+		await firstTaskRejection;
 
 		const secondTask = requestCpuMove(createState("p1"), 4);
 		const secondWorker = FakeWorker.instances[1];
