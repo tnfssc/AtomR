@@ -152,18 +152,11 @@ function requestMove(
 }
 
 function getParallelWorkerCount(moveCount: number) {
-	if (
-		moveCount < MIN_PARALLEL_MOVES ||
-		!canUseWorkerThreads() ||
-		typeof navigator === "undefined"
-	) {
+	if (moveCount < MIN_PARALLEL_MOVES) {
 		return 1;
 	}
 
-	const hardwareConcurrency = Math.max(
-		1,
-		Math.floor(navigator.hardwareConcurrency ?? 1),
-	);
+	const hardwareConcurrency = getWorkerHardwareConcurrency();
 	if (hardwareConcurrency < 2) return 1;
 
 	return Math.min(
@@ -171,6 +164,14 @@ function getParallelWorkerCount(moveCount: number) {
 		MAX_PARALLEL_WORKERS,
 		Math.max(2, hardwareConcurrency - 1),
 	);
+}
+
+function getWorkerHardwareConcurrency() {
+	if (!canUseWorkerThreads() || typeof navigator === "undefined") {
+		return 1;
+	}
+
+	return Math.max(1, Math.floor(navigator.hardwareConcurrency ?? 1));
 }
 
 function chunkMoves(moves: Position[], workerCount: number) {
