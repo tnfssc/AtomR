@@ -13,7 +13,11 @@ self.onmessage = (event: MessageEvent<AiWorkerRequest>) => {
 			request.kind === "scoreCpuBatch"
 				? {
 						id: request.id,
-						scored: scoreCpuMoves(request.state, request.difficulty, request.moves),
+						scored: scoreCpuMoves(
+							request.state,
+							request.difficulty,
+							request.moves,
+						),
 					}
 				: {
 						id: request.id,

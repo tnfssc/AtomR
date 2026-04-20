@@ -395,7 +395,9 @@ function pickMoveFromScores(
 		return orderedMoves[0] ?? legalMoves[0] ?? null;
 	}
 
-	const scoredByMove = new Map(scored.map((item) => [moveKey(item.move), item.value]));
+	const scoredByMove = new Map(
+		scored.map((item) => [moveKey(item.move), item.value]),
+	);
 	const orderedScored = orderedMoves.flatMap((move) => {
 		const value = scoredByMove.get(moveKey(move));
 		return value === undefined ? [] : [{ move, value }];
@@ -511,7 +513,11 @@ function chooseMoveWithConfig(
 		return legalMoves[index] ?? null;
 	}
 
-	const orderedMoves = orderCandidateMoves(state, legalMoves, config.candidateLimit);
+	const orderedMoves = orderCandidateMoves(
+		state,
+		legalMoves,
+		config.candidateLimit,
+	);
 	const scored = scoreMovesWithConfig(state, config, orderedMoves, options);
 	return pickMoveFromScores(legalMoves, orderedMoves, scored, config, random);
 }

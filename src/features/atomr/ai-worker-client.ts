@@ -1,5 +1,5 @@
-import type { AiWorkerRequest, AiWorkerResponse } from "./ai-worker-protocol";
 import type { ScoredMove } from "./ai";
+import type { AiWorkerRequest, AiWorkerResponse } from "./ai-worker-protocol";
 import type { GameState, Position } from "./types";
 
 export type AiMoveTask = {
@@ -12,7 +12,10 @@ type PendingRequest = {
 	reject: (error: Error) => void;
 };
 
-type MoveWorkerRequest = Extract<AiWorkerRequest, { kind: "cpu" | "recommended" }>;
+type MoveWorkerRequest = Extract<
+	AiWorkerRequest,
+	{ kind: "cpu" | "recommended" }
+>;
 
 const PARALLEL_CPU_DIFFICULTY = 10;
 const MIN_PARALLEL_MOVES = 4;
@@ -175,7 +178,10 @@ function chunkMoves(moves: Position[], workerCount: number) {
 	return batches.filter((batch) => batch.length > 0);
 }
 
-function requestParallelCpuMove(state: GameState, difficulty: number): AiMoveTask {
+function requestParallelCpuMove(
+	state: GameState,
+	difficulty: number,
+): AiMoveTask {
 	const workers: Worker[] = [];
 	let cancelled = false;
 	let settled = false;
@@ -256,9 +262,7 @@ function requestParallelCpuMove(state: GameState, difficulty: number): AiMoveTas
 										}
 										if (!("scored" in response)) {
 											rejectBatch(
-												new Error(
-													"AI worker returned an unexpected response",
-												),
+												new Error("AI worker returned an unexpected response"),
 											);
 											return;
 										}
