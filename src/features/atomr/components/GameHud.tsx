@@ -1,14 +1,27 @@
 import { Link } from "@tanstack/react-router";
-import { Home, SlidersHorizontal } from "lucide-react";
+import { Home, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { getActivePlayerOrder, PLAYER_COLORS } from "../constants";
 import type { GameState, PlayerId } from "../types";
 
 const REEL_TRANSITION_MS = 380;
+const HUD_BUTTON_CLASS_NAME =
+	"flex h-11 w-11 items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 focus-visible:ring-offset-2 focus-visible:ring-offset-[#07070b] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:active:scale-100 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3";
+const HUD_BUTTON_STYLE: React.CSSProperties = {
+	background: "rgba(255,255,255,0.02)",
+	color: "rgba(255,255,255,0.66)",
+	fontFamily: "'Oxanium', sans-serif",
+	fontSize: "10px",
+	fontWeight: 700,
+	letterSpacing: "0.22em",
+	textTransform: "uppercase",
+};
 
 type GameHudProps = {
 	state: GameState;
 	onSettingsOpen: () => void;
+	onUndo?: () => void;
+	undoDisabled?: boolean;
 };
 
 function getPlayersInRotation(state: GameState): PlayerId[] {
@@ -238,7 +251,12 @@ function TurnReel({
 	);
 }
 
-export default function GameHud({ state, onSettingsOpen }: GameHudProps) {
+export default function GameHud({
+	state,
+	onSettingsOpen,
+	onUndo,
+	undoDisabled = false,
+}: GameHudProps) {
 	const playersInRotation = getPlayersInRotation(state);
 	const reelPlayer = state.winner ?? state.currentPlayer;
 	const isResolving = state.phase === "resolving";
@@ -257,16 +275,8 @@ export default function GameHud({ state, onSettingsOpen }: GameHudProps) {
 				<Link
 					to="/play"
 					aria-label="Home"
-					className="flex h-9 w-9 items-center justify-center rounded-full no-underline transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] min-[480px]:h-10 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3"
-					style={{
-						background: "rgba(255,255,255,0.02)",
-						color: "rgba(255,255,255,0.66)",
-						fontFamily: "'Oxanium', sans-serif",
-						fontSize: "10px",
-						fontWeight: 700,
-						letterSpacing: "0.22em",
-						textTransform: "uppercase",
-					}}
+					className={`${HUD_BUTTON_CLASS_NAME} no-underline`}
+					style={HUD_BUTTON_STYLE}
 				>
 					<Home size={14} strokeWidth={2} />
 					<span className="hidden min-[480px]:inline">home</span>
@@ -281,24 +291,31 @@ export default function GameHud({ state, onSettingsOpen }: GameHudProps) {
 					/>
 				</div>
 
-				<button
-					type="button"
-					onClick={onSettingsOpen}
-					aria-label="Board settings"
-					className="flex h-9 w-9 items-center justify-center rounded-full transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98] min-[480px]:h-10 min-[480px]:w-auto min-[480px]:gap-2 min-[480px]:px-3"
-					style={{
-						background: "rgba(255,255,255,0.02)",
-						color: "rgba(255,255,255,0.58)",
-						fontFamily: "'Oxanium', sans-serif",
-						fontSize: "10px",
-						fontWeight: 700,
-						letterSpacing: "0.22em",
-						textTransform: "uppercase",
-					}}
-				>
-					<SlidersHorizontal size={14} strokeWidth={2} />
-					<span className="hidden min-[480px]:inline">board</span>
-				</button>
+				<div className="flex items-center gap-2">
+					{onUndo ? (
+						<button
+							type="button"
+							onClick={onUndo}
+							disabled={undoDisabled}
+							aria-label="Undo previous turn"
+							className={HUD_BUTTON_CLASS_NAME}
+							style={HUD_BUTTON_STYLE}
+						>
+							<RotateCcw size={14} strokeWidth={2} />
+							<span className="hidden min-[480px]:inline">undo</span>
+						</button>
+					) : null}
+					<button
+						type="button"
+						onClick={onSettingsOpen}
+						aria-label="Board settings"
+						className={HUD_BUTTON_CLASS_NAME}
+						style={HUD_BUTTON_STYLE}
+					>
+						<SlidersHorizontal size={14} strokeWidth={2} />
+						<span className="hidden min-[480px]:inline">board</span>
+					</button>
+				</div>
 			</div>
 		</div>
 	);
