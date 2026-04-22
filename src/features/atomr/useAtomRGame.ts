@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	applyMove,
 	createInitialGameState,
@@ -297,10 +297,10 @@ export function useAtomRGame(
 		isAnimatingRef.current = false;
 	}
 
-	function clearHistory() {
+	const clearHistory = useCallback(() => {
 		historyRef.current = [];
 		setCanUndo(false);
-	}
+	}, []);
 
 	// Cleanup on unmount
 	useEffect(() => {
