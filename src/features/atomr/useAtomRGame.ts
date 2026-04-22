@@ -329,7 +329,7 @@ export function useAtomRGame(
 		setActiveExplosions([]);
 		setLastMove(null);
 		clearHistory();
-	}, [rows, cols, playerCount, resetToken]);
+	}, [rows, cols, playerCount, resetToken, clearHistory]);
 
 	function finishPlayback(nextState: GameState) {
 		isAnimatingRef.current = false;
