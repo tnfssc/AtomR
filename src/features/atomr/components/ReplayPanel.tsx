@@ -266,14 +266,10 @@ export default function ReplayPanel({
 			</div>
 
 			{/* Body: move list + board preview */}
-			<div className="flex flex-1 min-h-0 overflow-hidden">
+			<div className="flex flex-col sm:flex-row flex-1 min-h-0 overflow-hidden">
 				{/* Move list */}
 				<div
-					className="flex flex-col shrink-0"
-					style={{
-						width: "clamp(200px, 35%, 320px)",
-						borderRight: "1px solid rgba(255,255,255,0.06)",
-					}}
+					className="order-2 sm:order-none flex flex-col sm:shrink-0 w-full sm:w-[clamp(200px,35%,320px)] h-[45vh] sm:h-auto border-t border-white/6 sm:border-t-0 sm:border-r sm:border-r-white/6"
 				>
 					{/* Nav controls */}
 					<div
@@ -455,7 +451,7 @@ export default function ReplayPanel({
 				</div>
 
 				{/* Board preview */}
-				<div className="flex flex-1 flex-col min-h-0 min-w-0">
+				<div className="order-1 sm:order-none flex flex-1 flex-col min-h-0 min-w-0">
 					{/* Before/After toggle */}
 					{selected && (
 						<div
@@ -467,7 +463,7 @@ export default function ReplayPanel({
 							<button
 								type="button"
 								onClick={() => setShowAfter(false)}
-								className="rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-150"
+								className="rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-150 whitespace-nowrap"
 								style={{
 									background: !showAfter
 										? `${activeColor}18`
@@ -483,7 +479,7 @@ export default function ReplayPanel({
 							<button
 								type="button"
 								onClick={() => setShowAfter(true)}
-								className="rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-150"
+								className="rounded-full px-4 py-1.5 text-[10px] font-bold uppercase tracking-[0.2em] transition-all duration-150 whitespace-nowrap"
 								style={{
 									background: showAfter
 										? `${activeColor}18`
@@ -585,7 +581,7 @@ export default function ReplayPanel({
 
 			{/* Footer hint */}
 			<div
-				className="flex items-center justify-center gap-6 px-4 py-2.5 shrink-0"
+				className="hidden sm:flex items-center justify-center gap-6 px-4 py-2.5 shrink-0"
 				style={{
 					borderTop: "1px solid rgba(255,255,255,0.04)",
 				}}

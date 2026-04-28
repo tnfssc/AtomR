@@ -76,7 +76,7 @@ export default function GameOverlay({
 				</div>
 
 				{/* Action buttons */}
-				<div className="mt-2 flex items-center gap-3">
+				<div className="mt-2 flex w-full flex-col items-stretch gap-3 sm:w-auto sm:flex-row sm:items-center">
 					<button
 						type="button"
 						onClick={onReset}
