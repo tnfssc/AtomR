@@ -268,9 +268,7 @@ export default function ReplayPanel({
 			{/* Body: move list + board preview */}
 			<div className="flex flex-col sm:flex-row flex-1 min-h-0 overflow-hidden">
 				{/* Move list */}
-				<div
-					className="order-2 sm:order-none flex flex-col sm:shrink-0 w-full sm:w-[clamp(200px,35%,320px)] h-[45vh] sm:h-auto border-t border-white/6 sm:border-t-0 sm:border-r sm:border-r-white/6"
-				>
+				<div className="order-2 sm:order-none flex flex-col sm:shrink-0 w-full sm:w-[clamp(200px,35%,320px)] h-[45vh] sm:h-auto border-t border-white/6 sm:border-t-0 sm:border-r sm:border-r-white/6">
 					{/* Nav controls */}
 					<div
 						className="flex items-center justify-between px-4 py-2.5 shrink-0"
