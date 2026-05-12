@@ -344,6 +344,8 @@ export function useBoardKeyboardNavigation({
 	}, [canPlay, clearRepeat]);
 
 	useEffect(() => {
+		if (!enabled) return;
+
 		function handleWindowKeyUp(event: KeyboardEvent) {
 			if (event.key === repeatKeyRef.current) {
 				clearRepeat();
@@ -361,7 +363,7 @@ export function useBoardKeyboardNavigation({
 			window.removeEventListener("keyup", handleWindowKeyUp);
 			window.removeEventListener("blur", handleWindowBlur);
 		};
-	}, [clearRepeat]);
+	}, [clearRepeat, enabled]);
 
 	useEffect(() => {
 		return () => {

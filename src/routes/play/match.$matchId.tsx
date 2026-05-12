@@ -487,6 +487,7 @@ function MatchPage() {
 						lastMove={lastMove}
 						keyboardNavigationEnabled={!matchState.winner}
 						canPlay={
+							!matchState.winner &&
 							Boolean(viewerPlayerId) &&
 							viewerPlayerId === matchState.currentPlayer &&
 							optimisticPlacement === null

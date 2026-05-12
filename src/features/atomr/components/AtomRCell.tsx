@@ -122,9 +122,11 @@ export default function AtomRCell({
 	const cellCoordinate = `${String.fromCharCode(65 + position.col)}${position.row + 1}`;
 	const availability = isAnimating
 		? "resolving"
-		: isLegal
+		: canActivate
 			? "legal"
-			: "illegal";
+			: isLegal
+				? "unavailable right now"
+				: "illegal";
 
 	// Background tint
 	let bgColor = "#141427";
