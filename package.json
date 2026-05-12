@@ -26,6 +26,7 @@
     "@posthog/react": "^1.9.0",
     "@storybook/react-vite": "^10.3.5",
     "@tailwindcss/vite": "^4.2.2",
+    "@tanstack/query-core": "5.99.1",
     "@tanstack/react-devtools": "0.10.2",
     "@tanstack/react-query": "5.99.1",
     "@tanstack/react-query-devtools": "5.99.1",
