@@ -18,7 +18,6 @@ type AtomRCellProps = {
 	isSuggested: boolean;
 	suggestedPlayer?: PlayerId | null;
 	tabIndex?: number;
-	descriptionId?: string;
 	buttonRef?: Ref<HTMLButtonElement>;
 	onFocus?: () => void;
 	onClick: () => void;
@@ -110,7 +109,6 @@ export default function AtomRCell({
 	isSuggested,
 	suggestedPlayer,
 	tabIndex = -1,
-	descriptionId,
 	buttonRef,
 	onFocus,
 	onClick,
@@ -147,7 +145,6 @@ export default function AtomRCell({
 			tabIndex={tabIndex}
 			className="group relative cursor-pointer focus-visible:outline-none"
 			aria-disabled={!canActivate}
-			aria-describedby={descriptionId}
 			aria-label={
 				cell.owner
 					? `${cellCoordinate}, ${cell.owner} cell with ${cell.count} orb${cell.count === 1 ? "" : "s"}, ${critical ? "critical, " : ""}${availability}`

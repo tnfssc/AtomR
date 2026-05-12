@@ -13,8 +13,6 @@ import type { GameState, LastMove, Position } from "../types";
 
 const INITIAL_REPEAT_DELAY_MS = 180;
 const BLOCKED_FEEDBACK_MS = 180;
-const STATUS_MESSAGE_MS = 1200;
-
 type ArrowKey = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
 
 type UseBoardKeyboardNavigationOptions = {
@@ -91,7 +89,6 @@ export function useBoardKeyboardNavigation({
 	const repeatKeyRef = useRef<ArrowKey | null>(null);
 	const repeatStartedAtRef = useRef(0);
 	const blockedTimerRef = useRef<number | null>(null);
-	const statusTimerRef = useRef<number | null>(null);
 	const announceTimerRef = useRef<number | null>(null);
 	const focusedPositionRef = useRef(
 		getInitialFocusedPosition(state.rows, state.cols, lastMove),
@@ -101,7 +98,6 @@ export function useBoardKeyboardNavigation({
 	);
 	const [hasFocusWithin, setHasFocusWithin] = useState(false);
 	const [blockedCellKey, setBlockedCellKey] = useState<string | null>(null);
-	const [transientStatus, setTransientStatus] = useState<string | null>(null);
 	const [liveMessage, setLiveMessage] = useState("");
 
 	const clearRepeat = useCallback(() => {
@@ -121,17 +117,6 @@ export function useBoardKeyboardNavigation({
 			setLiveMessage(message);
 			announceTimerRef.current = null;
 		}, 0);
-	}, []);
-
-	const showTransientMessage = useCallback((message: string) => {
-		if (statusTimerRef.current !== null) {
-			window.clearTimeout(statusTimerRef.current);
-		}
-		setTransientStatus(message);
-		statusTimerRef.current = window.setTimeout(() => {
-			setTransientStatus(null);
-			statusTimerRef.current = null;
-		}, STATUS_MESSAGE_MS);
 	}, []);
 
 	const focusPosition = useCallback(
@@ -155,10 +140,9 @@ export function useBoardKeyboardNavigation({
 				setBlockedCellKey(null);
 				blockedTimerRef.current = null;
 			}, BLOCKED_FEEDBACK_MS);
-			showTransientMessage(message);
 			announceMessage(message);
 		},
-		[announceMessage, showTransientMessage],
+		[announceMessage],
 	);
 
 	const attemptPlay = useCallback(
@@ -385,9 +369,6 @@ export function useBoardKeyboardNavigation({
 			if (blockedTimerRef.current !== null) {
 				window.clearTimeout(blockedTimerRef.current);
 			}
-			if (statusTimerRef.current !== null) {
-				window.clearTimeout(statusTimerRef.current);
-			}
 			if (announceTimerRef.current !== null) {
 				window.clearTimeout(announceTimerRef.current);
 			}
@@ -397,9 +378,6 @@ export function useBoardKeyboardNavigation({
 	return {
 		focusedPosition,
 		blockedCellKey,
-		statusLabel:
-			transientStatus ??
-			(isAnimating ? "Resolving..." : "Arrow keys wrap • Enter places"),
 		liveMessage,
 		handleCellFocus,
 		handleCellClick,

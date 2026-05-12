@@ -135,16 +135,15 @@ describe("AtomRBoard keyboard navigation", () => {
 		fireEvent.keyDown(b1, { key: "Enter" });
 
 		expect(onPlay).not.toHaveBeenCalled();
-		expect(
-			screen.queryByText("Illegal move. Choose an empty or owned cell."),
-		).not.toBeNull();
-		expect(b1.getAttribute("aria-disabled")).toBe("true");
 
 		act(() => {
-			vi.advanceTimersByTime(1200);
+			vi.runOnlyPendingTimers();
 		});
 
-		expect(screen.queryByText("Arrow keys wrap • Enter places")).not.toBeNull();
+		expect(
+			screen.getByText("Illegal move. Choose an empty or owned cell."),
+		).not.toBeNull();
+		expect(b1.getAttribute("aria-disabled")).toBe("true");
 	});
 
 	it("repeats arrow navigation while a key is held and stops on keyup", () => {
@@ -180,6 +179,5 @@ describe("AtomRBoard keyboard navigation", () => {
 		renderBoard({ keyboardNavigationEnabled: false });
 
 		expect(getCell("A1").getAttribute("tabindex")).toBe("-1");
-		expect(screen.queryByText("Arrow keys wrap • Enter places")).toBeNull();
 	});
 });

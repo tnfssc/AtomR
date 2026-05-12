@@ -1,4 +1,4 @@
-import { useId, useRef } from "react";
+import { useRef } from "react";
 import { isLegalMove } from "../engine";
 import type { GameState, LastMove, PlayerId, Position } from "../types";
 import type { ActiveExplosion } from "../useAtomRGame";
@@ -41,14 +41,12 @@ export default function AtomRBoard({
 	canPlay = true,
 	onPlay,
 }: AtomRBoardProps) {
-	const helpId = useId();
 	const explosionSet = new Set(activeExplosionKeys);
 	const captureSet = new Set(activeCaptureKeys);
 	const cellRefs = useRef<Array<HTMLButtonElement | null>>([]);
 	const {
 		focusedPosition,
 		blockedCellKey,
-		statusLabel,
 		liveMessage,
 		handleCellFocus,
 		handleCellClick,
@@ -100,7 +98,6 @@ export default function AtomRBoard({
 								: -1
 							: -1
 					}
-					descriptionId={keyboardNavigationEnabled ? helpId : undefined}
 					buttonRef={(node) => {
 						cellRefs.current[getCellIndex(row, col, state.cols)] = node;
 					}}
@@ -140,27 +137,9 @@ export default function AtomRBoard({
 					{cells}
 				</div>
 				{keyboardNavigationEnabled ? (
-					<>
-						<div className="pointer-events-none absolute inset-x-0 bottom-2 z-10 flex justify-center px-2">
-							<span
-								id={helpId}
-								className="rounded-full px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.22em]"
-								style={{
-									background: "rgba(7,7,11,0.7)",
-									color: isAnimating
-										? "rgba(255,255,255,0.82)"
-										: "rgba(255,255,255,0.5)",
-									backdropFilter: "blur(8px)",
-									boxShadow: "0 8px 24px rgba(0,0,0,0.24)",
-								}}
-							>
-								{statusLabel}
-							</span>
-						</div>
-						<div className="sr-only" aria-live="polite" aria-atomic="true">
-							{liveMessage}
-						</div>
-					</>
+					<div className="sr-only" aria-live="polite" aria-atomic="true">
+						{liveMessage}
+					</div>
 				) : null}
 				<FlyingOrbOverlay
 					activeExplosions={activeExplosions}
