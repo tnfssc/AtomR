@@ -203,6 +203,8 @@ export default function AiBattleScreen() {
 						activeExplosions={activeExplosions}
 						cellSize={cellSize}
 						lastMove={lastMove}
+						keyboardNavigationEnabled={false}
+						canPlay={false}
 						onPlay={() => {}}
 					/>
 					<GameOverlay

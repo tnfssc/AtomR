@@ -485,6 +485,12 @@ function MatchPage() {
 						activeExplosions={activeExplosions}
 						cellSize={cellSize}
 						lastMove={lastMove}
+						keyboardNavigationEnabled={!matchState.winner}
+						canPlay={
+							Boolean(viewerPlayerId) &&
+							viewerPlayerId === matchState.currentPlayer &&
+							optimisticPlacement === null
+						}
 						onPlay={(row, col) => {
 							if (
 								!viewerPlayerId ||

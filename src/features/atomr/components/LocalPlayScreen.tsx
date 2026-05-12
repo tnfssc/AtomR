@@ -75,6 +75,8 @@ export default function LocalPlayScreen() {
 	const hudStyle: React.CSSProperties = boardDims
 		? { width: `${boardDims.w}px`, maxWidth: "100%" }
 		: { width: "100%", maxWidth: "100%" };
+	const boardKeyboardEnabled =
+		!settingsOpen && !replayOpen && !state.winner && !state.isDraw;
 
 	return (
 		<main
@@ -117,6 +119,8 @@ export default function LocalPlayScreen() {
 						activeExplosions={activeExplosions}
 						cellSize={cellSize}
 						lastMove={lastMove}
+						keyboardNavigationEnabled={boardKeyboardEnabled}
+						canPlay={boardKeyboardEnabled}
 						onPlay={(row, col) => handleMove({ row, col })}
 					/>
 					<GameOverlay

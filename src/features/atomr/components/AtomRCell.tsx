@@ -1,3 +1,4 @@
+import type { KeyboardEventHandler, Ref } from "react";
 import { PLAYER_COLORS } from "../constants";
 import { isCellCritical } from "../selectors";
 import type { Cell, GameState, PlayerId, Position } from "../types";
@@ -8,13 +9,20 @@ type AtomRCellProps = {
 	position: Position;
 	activeColor: string;
 	isLegal: boolean;
+	canActivate: boolean;
 	isAnimating: boolean;
 	isExploding: boolean;
 	isCapturing: boolean;
+	isBlockedFeedback: boolean;
 	isLastMove: boolean;
 	isSuggested: boolean;
 	suggestedPlayer?: PlayerId | null;
-	onPlay: () => void;
+	tabIndex?: number;
+	descriptionId?: string;
+	buttonRef?: Ref<HTMLButtonElement>;
+	onFocus?: () => void;
+	onClick: () => void;
+	onKeyDown?: KeyboardEventHandler<HTMLButtonElement>;
 };
 
 // Orb positions as percentages of cell dimensions
@@ -93,20 +101,32 @@ export default function AtomRCell({
 	position,
 	activeColor,
 	isLegal,
+	canActivate,
 	isAnimating,
 	isExploding,
 	isCapturing,
+	isBlockedFeedback,
 	isLastMove,
 	isSuggested,
 	suggestedPlayer,
-	onPlay,
+	tabIndex = -1,
+	descriptionId,
+	buttonRef,
+	onFocus,
+	onClick,
+	onKeyDown,
 }: AtomRCellProps) {
 	const ownerColor = cell.owner ? PLAYER_COLORS[cell.owner] : null;
 	const suggestionColor = suggestedPlayer
 		? PLAYER_COLORS[suggestedPlayer]
 		: null;
 	const critical = isCellCritical(state, cell, position.row, position.col);
-	const disabled = !isLegal || isAnimating;
+	const cellCoordinate = `${String.fromCharCode(65 + position.col)}${position.row + 1}`;
+	const availability = isAnimating
+		? "resolving"
+		: isLegal
+			? "legal"
+			: "illegal";
 
 	// Background tint
 	let bgColor = "#141427";
@@ -119,14 +139,19 @@ export default function AtomRCell({
 
 	return (
 		<button
+			ref={buttonRef}
 			type="button"
-			onClick={onPlay}
-			disabled={disabled}
-			className="group relative cursor-pointer disabled:cursor-default"
+			onClick={onClick}
+			onFocus={onFocus}
+			onKeyDown={onKeyDown}
+			tabIndex={tabIndex}
+			className="group relative cursor-pointer focus-visible:outline-none"
+			aria-disabled={!canActivate}
+			aria-describedby={descriptionId}
 			aria-label={
 				cell.owner
-					? `${cell.owner} cell with ${cell.count} orb${cell.count === 1 ? "" : "s"}`
-					: "Empty cell"
+					? `${cellCoordinate}, ${cell.owner} cell with ${cell.count} orb${cell.count === 1 ? "" : "s"}, ${critical ? "critical, " : ""}${availability}`
+					: `${cellCoordinate}, empty cell, ${availability}`
 			}
 		>
 			{/* Main cell face */}
@@ -159,6 +184,25 @@ export default function AtomRCell({
 						} as React.CSSProperties
 					}
 				/>
+
+				<span
+					className="pointer-events-none absolute inset-[1px] rounded-[3px] opacity-0 transition-opacity duration-100 group-focus-visible:opacity-100"
+					style={{
+						boxShadow:
+							"inset 0 0 0 2px rgba(255,255,255,0.92), 0 0 0 1px rgba(255,255,255,0.12), 0 0 18px rgba(255,255,255,0.24)",
+					}}
+				/>
+
+				{isBlockedFeedback ? (
+					<span
+						className="pointer-events-none absolute inset-[3px] rounded-[2px]"
+						style={{
+							boxShadow: "inset 0 0 0 2px rgba(255,255,255,0.9)",
+							animation:
+								"cr-capture-ripple 0.18s cubic-bezier(0.22, 1, 0.36, 1)",
+						}}
+					/>
+				) : null}
 
 				{isLastMove && (
 					<span
@@ -201,7 +245,7 @@ export default function AtomRCell({
 					/>
 				)}
 				{/* Hover glow overlay — legal, non-animating only */}
-				{!disabled && (
+				{canActivate && (
 					<span
 						className="absolute inset-0 opacity-0 transition-opacity duration-150 group-hover:opacity-100 pointer-events-none"
 						style={{

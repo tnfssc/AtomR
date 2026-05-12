@@ -99,6 +99,8 @@ export default function TrainingPlayScreen() {
 	const hudStyle: React.CSSProperties = boardDims
 		? { width: `${boardDims.w}px`, maxWidth: "100%" }
 		: { width: "100%", maxWidth: "100%" };
+	const boardKeyboardEnabled =
+		!settingsOpen && !replayOpen && !state.winner && !state.isDraw;
 
 	useEffect(() => {
 		if (suggestionTimerRef.current !== null) {
@@ -201,6 +203,8 @@ export default function TrainingPlayScreen() {
 						lastMove={lastMove}
 						suggestedMove={suggestedMove}
 						suggestedPlayer={resolvedState.currentPlayer}
+						keyboardNavigationEnabled={boardKeyboardEnabled}
+						canPlay={boardKeyboardEnabled}
 						onPlay={(row, col) => handleMove({ row, col })}
 					/>
 					<GameOverlay

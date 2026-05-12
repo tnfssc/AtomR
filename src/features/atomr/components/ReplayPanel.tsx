@@ -99,6 +99,8 @@ function MiniBoard({
 					activeCaptureKeys={[]}
 					activeExplosions={[]}
 					cellSize={cellSize}
+					keyboardNavigationEnabled={false}
+					canPlay={false}
 					lastMove={
 						highlightRow !== undefined && highlightCol !== undefined
 							? {
