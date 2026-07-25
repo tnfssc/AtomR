@@ -36,6 +36,9 @@ const MAX_PRIVATE_COLS = 16
 const MAX_SEARCHING_QUEUE_SCAN = 128
 const MAX_ACTIVE_MATCH_SCAN = 24
 const PRESENCE_UPDATE_INTERVAL_MS = 30_000
+const MAX_OPEN_ROOMS_PER_USER = 3
+const MAX_QUEUED_PREMOVES = 5
+const MAX_EXPIRED_ROOMS_SCAN = 100
 
 function getOpponentPlayer(playerId: PlayerId): PlayerId {
 	return playerId === 'p1' ? 'p2' : 'p1'
@@ -394,6 +397,16 @@ export const createPrivateRoom = mutation({
 	handler: async (ctx, args) => {
 		assertBoardSize(args.rows, args.cols)
 		const { userId: hostUserId } = await ensureCurrentUser(ctx)
+
+		const openRooms = await ctx.db
+			.query('privateRooms')
+			.withIndex('by_host_user_id', (q) => q.eq('hostUserId', hostUserId))
+			.filter((q) => q.eq(q.field('status'), 'open'))
+			.collect()
+		if (openRooms.length >= MAX_OPEN_ROOMS_PER_USER) {
+			throw new Error('Too many open rooms')
+		}
+
 		for (let attempt = 0; attempt < 10; attempt += 1) {
 			const code = makeRoomCode()
 			const existing = await ctx.db
@@ -801,6 +814,7 @@ export const submitMove = mutation({
 		matchId: v.id('matches'),
 		row: v.number(),
 		col: v.number(),
+		expectedTurnNumber: v.optional(v.number()),
 	},
 	handler: async (ctx, args) => {
 		const { viewer } = await ensureCurrentUser(ctx)
@@ -816,6 +830,13 @@ export const submitMove = mutation({
 		if (match.player1UserId === viewer._id) playerId = 'p1'
 		if (match.player2UserId === viewer._id) playerId = 'p2'
 		if (!playerId) throw new Error('Not part of this match')
+
+		if (
+			args.expectedTurnNumber !== undefined &&
+			match.turnNumber !== args.expectedTurnNumber
+		) {
+			throw new Error('Stale move')
+		}
 
 		const turnTimedOut = await resolveTurnTimeoutIfNeeded(ctx, match)
 		if (turnTimedOut.timedOut) throw new Error('Turn timed out')
@@ -860,6 +881,11 @@ export const queuePremove = mutation({
 		if (!playerId) throw new Error('Not part of this match')
 		if (match.currentPlayer === playerId) {
 			throw new Error('Cannot queue premove on your turn')
+		}
+
+		const existingPremoves = getQueuedPremoves(match.queuedPremoves, playerId)
+		if (existingPremoves.length >= MAX_QUEUED_PREMOVES) {
+			throw new Error('Premove queue full')
 		}
 
 		const state = toGameState(match)
@@ -970,6 +996,27 @@ export const refreshOnlineCount = internalMutation({
 				updatedAt: now,
 			})
 		}
+	},
+})
+
+/** Cron target: mark open private rooms past their expiry as 'expired'. */
+export const cleanupExpiredRooms = internalMutation({
+	args: {},
+	handler: async (ctx) => {
+		const now = Date.now()
+		const expiredRooms = await ctx.db
+			.query('privateRooms')
+			.withIndex('by_status', (q: any) => q.eq('status', 'open'))
+			.filter((q: any) => q.lt(q.field('expiresAt'), now))
+			.take(MAX_EXPIRED_ROOMS_SCAN)
+
+		let expired = 0
+		for (const room of expiredRooms) {
+			await ctx.db.patch(room._id, { status: 'expired' })
+			expired += 1
+		}
+
+		return { expired }
 	},
 })
 
