@@ -1,5 +1,7 @@
 import { internal } from './_generated/api'
 import { internalMutation, mutation, query } from './_generated/server'
+import type { MutationCtx, QueryCtx } from './_generated/server'
+import type { Doc, Id } from './_generated/dataModel'
 import { v } from 'convex/values'
 import { authComponent } from './auth'
 import {
@@ -22,11 +24,13 @@ import {
 	createPlayerFlags,
 	type GameState,
 	type PlayerId,
+	type PlayerFlags,
 } from '../src/features/atomr/shared'
 import {
 	evaluateSearchingQueue,
 	isMatchedQueueEntryObsolete as isMatchedQueueEntryObsoleteRule,
 	isSearchingQueueEntryStale,
+	type MatchLike,
 } from '../src/features/atomr/onlineMatchmaking'
 
 const MIN_PRIVATE_ROWS = 3
@@ -44,7 +48,7 @@ function getOpponentPlayer(playerId: PlayerId): PlayerId {
 	return playerId === 'p1' ? 'p2' : 'p1'
 }
 
-function toStoredPlayerFlags(flags: any) {
+function toStoredPlayerFlags(flags: PlayerFlags) {
 	const defaults = createPlayerFlags(false)
 	return {
 		p1: flags.p1 ?? defaults.p1 ?? false,
@@ -58,7 +62,7 @@ function toStoredPlayerFlags(flags: any) {
 	}
 }
 
-function toGameState(match: any): GameState {
+function toGameState(match: Doc<'matches'>): GameState {
 	return {
 		board: match.board,
 		rows: match.rows,
@@ -88,7 +92,7 @@ function assertBoardSize(rows: number, cols: number) {
 	}
 }
 
-async function requireAuthUser(ctx: any) {
+async function requireAuthUser(ctx: MutationCtx) {
 	const authUser = await authComponent.getAuthUser(ctx)
 	if (!authUser) {
 		throw new Error('Not authenticated')
@@ -96,14 +100,14 @@ async function requireAuthUser(ctx: any) {
 	return authUser
 }
 
-async function getViewerByAuthUserId(ctx: any, authUserId: string) {
+async function getViewerByAuthUserId(ctx: QueryCtx, authUserId: string) {
 	return await ctx.db
 		.query('users')
-		.withIndex('by_auth_user_id', (q: any) => q.eq('authUserId', authUserId))
+		.withIndex('by_auth_user_id', (q) => q.eq('authUserId', authUserId))
 		.unique()
 }
 
-async function ensureCurrentUser(ctx: any) {
+async function ensureCurrentUser(ctx: MutationCtx) {
 	const authUser = await requireAuthUser(ctx)
 	const { _id: userId, doc: viewer } = await ensureUser(
 		ctx,
@@ -115,7 +119,7 @@ async function ensureCurrentUser(ctx: any) {
 	return { authUser, viewer, userId }
 }
 
-async function getCurrentViewer(ctx: any) {
+async function getCurrentViewer(ctx: QueryCtx) {
 	const authUser = await authComponent.getAuthUser(ctx)
 	if (!authUser) return null
 	const viewer = await getViewerByAuthUserId(ctx, authUser._id)
@@ -126,18 +130,18 @@ async function getCurrentViewer(ctx: any) {
 }
 
 async function findFreshSearchingOpponent(
-	ctx: any,
+	ctx: MutationCtx,
 	{
 		excludeUserId,
 		now,
 	}: {
-		excludeUserId: any
+		excludeUserId: Id<'users'>
 		now: number
 	},
 ) {
 	const searchingEntries = await ctx.db
 		.query('matchmakingQueue')
-		.withIndex('by_status_requested_at', (q: any) => q.eq('status', 'searching'))
+		.withIndex('by_status_requested_at', (q) => q.eq('status', 'searching'))
 		.take(MAX_SEARCHING_QUEUE_SCAN)
 
 	const usersById = new Map()
@@ -154,17 +158,21 @@ async function findFreshSearchingOpponent(
 	)
 
 	for (const staleEntryId of staleEntryIds) {
-		await ctx.db.patch(staleEntryId, { status: 'cancelled' })
+		await ctx.db.patch(staleEntryId as Id<'matchmakingQueue'>, { status: 'cancelled' })
 	}
 
 	return opponent
 }
 
-async function isMatchedQueueEntryObsolete(ctx: any, entry: any, viewer: any) {
+async function isMatchedQueueEntryObsolete(
+	ctx: QueryCtx,
+	entry: Doc<'matchmakingQueue'>,
+	viewer: Doc<'users'>,
+) {
 	if (!entry.matchId) return true
 
 	const match = await ctx.db.get(entry.matchId)
-	return isMatchedQueueEntryObsoleteRule(entry, viewer, match)
+	return isMatchedQueueEntryObsoleteRule(entry, viewer, match as MatchLike | null)
 }
 
 function alphabet() {
@@ -184,14 +192,14 @@ function makeRoomCode() {
 }
 
 async function ensureUser(
-	ctx: any,
+	ctx: MutationCtx,
 	authUserId: string,
 	displayName: string,
 	email?: string,
 ) {
 	const existing = await ctx.db
 		.query('users')
-		.withIndex('by_auth_user_id', (q: any) => q.eq('authUserId', authUserId))
+		.withIndex('by_auth_user_id', (q) => q.eq('authUserId', authUserId))
 		.unique()
 	const now = Date.now()
 	if (existing) {
@@ -224,10 +232,10 @@ async function ensureUser(
 	return { _id: insertedId, doc }
 }
 
-async function cleanupStaleQueueEntries(ctx: any, now = Date.now()) {
+async function cleanupStaleQueueEntries(ctx: MutationCtx, now = Date.now()) {
 	const searchingEntries = await ctx.db
 		.query('matchmakingQueue')
-		.withIndex('by_status_requested_at', (q: any) => q.eq('status', 'searching'))
+		.withIndex('by_status_requested_at', (q) => q.eq('status', 'searching'))
 		.take(MAX_SEARCHING_QUEUE_SCAN)
 
 	const usersById = new Map()
@@ -245,14 +253,19 @@ async function cleanupStaleQueueEntries(ctx: any, now = Date.now()) {
 }
 
 async function scheduleTurnTimeout(
-	ctx: any,
+	ctx: MutationCtx,
 	args: {
-		matchId: any
+		matchId: Id<'matches'>
 		expectedTurnNumber: number
 		expectedCurrentPlayer: PlayerId
 		expectedLastMoveAt: number
 	},
 ) {
+	// `internal` is typed via FilterApi, which narrows `expectedCurrentPlayer` to
+	// `'p1' | 'p2'` from the validator, but this helper works with the broader
+	// `PlayerId` union used by the shared engine. The scheduler's
+	// function-reference type does not accept the wider union, so the cast is
+	// required to bridge the generated scheduler typing to our engine types.
 	const internalApi = internal as any
 	await ctx.scheduler.runAfter(
 		ONLINE_TURN_TIME_LIMIT_MS,
@@ -262,21 +275,25 @@ async function scheduleTurnTimeout(
 }
 
 async function scheduleQueuedPremoveExecution(
-	ctx: any,
+	ctx: MutationCtx,
 	args: {
-		matchId: any
+		matchId: Id<'matches'>
 		expectedTurnNumber: number
 		expectedCurrentPlayer: PlayerId
 		expectedLastMoveAt: number
 	},
 ) {
+	// See scheduleTurnTimeout: the scheduler's function-reference type narrows
+	// `expectedCurrentPlayer` to `'p1' | 'p2'` (from the validator), which is
+	// incompatible with the broader `PlayerId` used by the shared engine, so
+	// the cast on `internal` is retained.
 	const internalApi = internal as any
 	await ctx.scheduler.runAfter(0, internalApi.online.executeQueuedPremove, args)
 }
 
 async function persistResolvedMove(
-	ctx: any,
-	match: any,
+	ctx: MutationCtx,
+	match: Doc<'matches'>,
 	{
 		playerId,
 		now,
@@ -320,8 +337,8 @@ async function persistResolvedMove(
 }
 
 async function resolveTurnTimeoutIfNeeded(
-	ctx: any,
-	match: any,
+	ctx: MutationCtx,
+	match: Doc<'matches'> | null,
 	expected?: {
 		expectedTurnNumber?: number
 		expectedCurrentPlayer?: PlayerId
@@ -519,7 +536,7 @@ export const joinQueue = mutation({
 			const initialState = createInitialGameState(6, 9, 2)
 			const matchId = await ctx.db.insert('matches', {
 				type: 'public',
-				player1UserId: opponent.userId as any,
+				player1UserId: opponent.userId as Id<'users'>,
 				player2UserId: userId,
 				rows: 6,
 				cols: 9,
@@ -545,7 +562,7 @@ export const joinQueue = mutation({
 				expectedLastMoveAt: now,
 			})
 
-			await ctx.db.patch(opponent._id as any, { status: 'matched', matchId })
+			await ctx.db.patch(opponent._id as Id<'matchmakingQueue'>, { status: 'matched', matchId })
 			const queueId = await ctx.db.insert('matchmakingQueue', {
 				userId,
 				status: 'matched',
@@ -979,14 +996,14 @@ export const refreshOnlineCount = internalMutation({
 		const cutoff = now - ONLINE_PRESENCE_WINDOW_MS
 		const recent = await ctx.db
 			.query('users')
-			.withIndex('by_last_seen_at', (q: any) => q.gte('lastSeenAt', cutoff))
+			.withIndex('by_last_seen_at', (q) => q.gte('lastSeenAt', cutoff))
 			.take(ONLINE_COUNT_CAP)
 		const count = recent.length
 
 		const existing = await ctx.db
 			.query('siteStats')
-			.withIndex('by_key', (q: any) => q.eq('key', SITE_STATS_KEY))
-			.unique()
+		.withIndex('by_key', (q) => q.eq('key', SITE_STATS_KEY))
+		.unique()
 		if (existing) {
 			await ctx.db.patch(existing._id, { onlineCount: count, updatedAt: now })
 		} else {
@@ -1026,8 +1043,8 @@ export const getOnlineCount = query({
 	handler: async (ctx) => {
 		const stat = await ctx.db
 			.query('siteStats')
-			.withIndex('by_key', (q: any) => q.eq('key', SITE_STATS_KEY))
-			.unique()
+		.withIndex('by_key', (q) => q.eq('key', SITE_STATS_KEY))
+		.unique()
 		return stat ? { onlineCount: stat.onlineCount, updatedAt: stat.updatedAt } : { onlineCount: 0, updatedAt: 0 }
 	},
 })
