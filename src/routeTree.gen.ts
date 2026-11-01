@@ -9,27 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as SignUpRouteImport } from './routes/sign-up'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as PlayRouteImport } from './routes/play'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as PlayTrainingRouteImport } from './routes/play/training'
-import { Route as PlayOnlineRouteImport } from './routes/play/online'
-import { Route as PlayLocalRouteImport } from './routes/play/local'
-import { Route as PlayAiBattleRouteImport } from './routes/play/ai-battle'
+import { Route as PlayRouteImport } from './routes/play'
+import { Route as SignInRouteImport } from './routes/sign-in'
+import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as PlayAiRouteImport } from './routes/play/ai'
-import { Route as PlayRoomCodeRouteImport } from './routes/play/room.$code'
-import { Route as PlayMatchMatchIdRouteImport } from './routes/play/match.$matchId'
+import { Route as PlayAiBattleRouteImport } from './routes/play/ai-battle'
+import { Route as PlayLocalRouteImport } from './routes/play/local'
+import { Route as PlayOnlineRouteImport } from './routes/play/online'
+import { Route as PlayTrainingRouteImport } from './routes/play/training'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as PlayMatchMatchIdRouteImport } from './routes/play/match.$matchId'
+import { Route as PlayRoomCodeRouteImport } from './routes/play/room.$code'
 
-const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayRoute = PlayRouteImport.update({
@@ -37,24 +32,19 @@ const PlayRoute = PlayRouteImport.update({
   path: '/play',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const SignInRoute = SignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlayTrainingRoute = PlayTrainingRouteImport.update({
-  id: '/training',
-  path: '/training',
-  getParentRoute: () => PlayRoute,
+const SignUpRoute = SignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const PlayOnlineRoute = PlayOnlineRouteImport.update({
-  id: '/online',
-  path: '/online',
-  getParentRoute: () => PlayRoute,
-} as any)
-const PlayLocalRoute = PlayLocalRouteImport.update({
-  id: '/local',
-  path: '/local',
+const PlayAiRoute = PlayAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
   getParentRoute: () => PlayRoute,
 } as any)
 const PlayAiBattleRoute = PlayAiBattleRouteImport.update({
@@ -62,25 +52,35 @@ const PlayAiBattleRoute = PlayAiBattleRouteImport.update({
   path: '/ai-battle',
   getParentRoute: () => PlayRoute,
 } as any)
-const PlayAiRoute = PlayAiRouteImport.update({
-  id: '/ai',
-  path: '/ai',
+const PlayLocalRoute = PlayLocalRouteImport.update({
+  id: '/local',
+  path: '/local',
   getParentRoute: () => PlayRoute,
 } as any)
-const PlayRoomCodeRoute = PlayRoomCodeRouteImport.update({
-  id: '/room/$code',
-  path: '/room/$code',
+const PlayOnlineRoute = PlayOnlineRouteImport.update({
+  id: '/online',
+  path: '/online',
   getParentRoute: () => PlayRoute,
 } as any)
-const PlayMatchMatchIdRoute = PlayMatchMatchIdRouteImport.update({
-  id: '/match/$matchId',
-  path: '/match/$matchId',
+const PlayTrainingRoute = PlayTrainingRouteImport.update({
+  id: '/training',
+  path: '/training',
   getParentRoute: () => PlayRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PlayMatchMatchIdRoute = PlayMatchMatchIdRouteImport.update({
+  id: '/match/$matchId',
+  path: '/match/$matchId',
+  getParentRoute: () => PlayRoute,
+} as any)
+const PlayRoomCodeRoute = PlayRoomCodeRouteImport.update({
+  id: '/room/$code',
+  path: '/room/$code',
+  getParentRoute: () => PlayRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -181,18 +181,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/play': {
@@ -202,32 +195,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/sign-in': {
+      id: '/sign-in'
+      path: '/sign-in'
+      fullPath: '/sign-in'
+      preLoaderRoute: typeof SignInRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/play/training': {
-      id: '/play/training'
-      path: '/training'
-      fullPath: '/play/training'
-      preLoaderRoute: typeof PlayTrainingRouteImport
-      parentRoute: typeof PlayRoute
+    '/sign-up': {
+      id: '/sign-up'
+      path: '/sign-up'
+      fullPath: '/sign-up'
+      preLoaderRoute: typeof SignUpRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/play/online': {
-      id: '/play/online'
-      path: '/online'
-      fullPath: '/play/online'
-      preLoaderRoute: typeof PlayOnlineRouteImport
-      parentRoute: typeof PlayRoute
-    }
-    '/play/local': {
-      id: '/play/local'
-      path: '/local'
-      fullPath: '/play/local'
-      preLoaderRoute: typeof PlayLocalRouteImport
+    '/play/ai': {
+      id: '/play/ai'
+      path: '/ai'
+      fullPath: '/play/ai'
+      preLoaderRoute: typeof PlayAiRouteImport
       parentRoute: typeof PlayRoute
     }
     '/play/ai-battle': {
@@ -237,25 +223,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayAiBattleRouteImport
       parentRoute: typeof PlayRoute
     }
-    '/play/ai': {
-      id: '/play/ai'
-      path: '/ai'
-      fullPath: '/play/ai'
-      preLoaderRoute: typeof PlayAiRouteImport
+    '/play/local': {
+      id: '/play/local'
+      path: '/local'
+      fullPath: '/play/local'
+      preLoaderRoute: typeof PlayLocalRouteImport
       parentRoute: typeof PlayRoute
     }
-    '/play/room/$code': {
-      id: '/play/room/$code'
-      path: '/room/$code'
-      fullPath: '/play/room/$code'
-      preLoaderRoute: typeof PlayRoomCodeRouteImport
+    '/play/online': {
+      id: '/play/online'
+      path: '/online'
+      fullPath: '/play/online'
+      preLoaderRoute: typeof PlayOnlineRouteImport
       parentRoute: typeof PlayRoute
     }
-    '/play/match/$matchId': {
-      id: '/play/match/$matchId'
-      path: '/match/$matchId'
-      fullPath: '/play/match/$matchId'
-      preLoaderRoute: typeof PlayMatchMatchIdRouteImport
+    '/play/training': {
+      id: '/play/training'
+      path: '/training'
+      fullPath: '/play/training'
+      preLoaderRoute: typeof PlayTrainingRouteImport
       parentRoute: typeof PlayRoute
     }
     '/api/auth/$': {
@@ -264,6 +250,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/auth/$'
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/play/match/$matchId': {
+      id: '/play/match/$matchId'
+      path: '/match/$matchId'
+      fullPath: '/play/match/$matchId'
+      preLoaderRoute: typeof PlayMatchMatchIdRouteImport
+      parentRoute: typeof PlayRoute
+    }
+    '/play/room/$code': {
+      id: '/play/room/$code'
+      path: '/room/$code'
+      fullPath: '/play/room/$code'
+      preLoaderRoute: typeof PlayRoomCodeRouteImport
+      parentRoute: typeof PlayRoute
     }
   }
 }
