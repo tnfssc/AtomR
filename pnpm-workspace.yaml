@@ -4,3 +4,13 @@ onlyBuiltDependencies:
   - core-js
   - esbuild
   - protobufjs
+
+overrides:
+  "seroval": "^1.6.11"
+  "dompurify": "^3.4.17"
+  "shell-quote": "^1.11.0"
+  "undici@7": "^7.30.1"
+  "js-yaml@4": "^4.3.2"
+  "nanoid@3": "^3.3.18"
+  "brace-expansion@5": "^5.0.12"
+  "launch-editor": "^2.14.2"
